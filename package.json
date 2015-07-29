@@ -1,0 +1,19 @@
+{
+  "name": "base-frame",
+  "version": "0.0.1",
+  "description": "Base classes for creation your own application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/savelichalex/base-frame.git"
+  },
+  "author": "Alexey Savelyev",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/savelichalex/base-frame/issues"
+  },
+  "homepage": "https://github.com/savelichalex/base-frame#readme"
+}
