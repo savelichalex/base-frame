@@ -1,6 +1,6 @@
 {
   "name": "base-frame",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Base classes for creation your own application",
   "main": "index.js",
   "scripts": {
@@ -10,10 +10,22 @@
     "type": "git",
     "url": "git+https://github.com/savelichalex/base-frame.git"
   },
-  "author": "Alexey Savelyev",
+  "author": {
+    "name": "Alexey Savelyev"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/savelichalex/base-frame/issues"
   },
-  "homepage": "https://github.com/savelichalex/base-frame#readme"
+  "homepage": "https://github.com/savelichalex/base-frame#readme",
+  "dependencies": {
+    "bluebird": "2.9.*",
+    "virtual-dom": "~2.1.0",
+    "html-to-vdom": "~0.7.0",
+    "underscore": "1.8.*",
+    "backbone-events-standalone": "~0.2.7",
+    "jquery": "2.1.*"
+  },
+  "readme": "Base classes for create application. Add some arhitecture\n",
+  "readmeFilename": "README.md"
 }

@@ -1,4 +1,4 @@
-import Emitter from './../core/Emitter.js';
+import Emitter from './Emitter.js';
 
 var BaseModel = function() {
     this._emitter = Emitter();
