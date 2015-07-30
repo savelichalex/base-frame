@@ -12,7 +12,7 @@ var convert = convertHTML({
 import { BaseView } from './baseView';
 
 export function BaseItemView() {
-
+    this.super();
 }
 
 BaseItemView.prototype = {

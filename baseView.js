@@ -7,6 +7,7 @@ import patch from 'virtual-dom/patch';
 import createElement from 'virtual-dom/create-element';
 
 import { defer } from './util';
+import Emitter from './Emitter.js';
 
 export function BaseView() {
     this._emitter = Emitter();
