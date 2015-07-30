@@ -2,28 +2,17 @@ import _ from 'underscore';
 import $ from 'jquery';
 import Promise from 'bluebird';
 
-import { defer } from './util';
-
 import diff from 'virtual-dom/diff';
 import patch from 'virtual-dom/patch';
-import VNode from 'virtual-dom/vnode/vnode';
-import VText from 'virtual-dom/vnode/vtext';
 import createElement from 'virtual-dom/create-element';
 
-import convertHTML from 'html-to-vdom';
+import { defer } from './util';
 
-var convert = convertHTML({
-    VNode: VNode,
-    VText: VText
-});
-
-export function BaseItemView() {
+export function BaseView() {
 
 }
 
-BaseItemView.prototype = {
-
-    template: void 0,
+BaseView.prototype = {
 
     rootNode: void 0,
 
@@ -31,12 +20,7 @@ BaseItemView.prototype = {
 
     _vdomNode: void 0,
 
-    render(model) {
-        if(!this.template || !this.rootNode) {
-            throw new Error('Template and rootNode not specified');
-        }
-        let new_vdom = convert(this._templateCachedFn(model));
-
+    _render: function(new_vdom) {
         if(this._vdom) {
             var patches = diff(this._vdom, new_vdom);
             this._vdomNode = patch(this._vdomNode, patches);
@@ -76,7 +60,7 @@ BaseItemView.prototype = {
 
                     this._initRootNode();
 
-                    $(this.rootNode).on(type, this.searchListener(this));
+                    $(this.rootNode).on(type, this._searchListener(this));
                 }
 
                 let listener = events[event];
@@ -94,7 +78,7 @@ BaseItemView.prototype = {
         }
     },
 
-    searchListener: function(context) {
+    _searchListener: function(context) {
         return function(event) {
             event = event.originalEvent; //because use jQuery, temp
             let target = event.target;
@@ -134,12 +118,9 @@ BaseItemView.prototype = {
         }
     },
 
-    init: function() {
-        this._templateCachedFn = _.template(this.template);
-        this._createEvents(this.events);
+    _init: function() {
+        if(this.events) {
+            this._createEvents(this.events);
+        }
     }
 };
-
-export function BaseCollectionView() {
-
-}
