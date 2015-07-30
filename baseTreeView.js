@@ -41,9 +41,9 @@ BaseTreeView.prototype = {
             this.rootTemplate = '<div><%= children %></div>';
         }
 
-        this.renderRootTemplate = _.template(this.rootTemplate);
-        this.renderNodeTemplate = _.template(this.nodeTemplate);
-        this.renderListTemplate = _.template(this.listTemplate);
+        this.renderRootTemplate = _.template(this.rootTemplate.trim());
+        this.renderNodeTemplate = _.template(this.nodeTemplate.trim());
+        this.renderListTemplate = _.template(this.listTemplate.trim());
 
         this._init();
     },

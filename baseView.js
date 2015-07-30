@@ -9,7 +9,8 @@ import createElement from 'virtual-dom/create-element';
 import { defer } from './util';
 
 export function BaseView() {
-
+    this._emitter = Emitter();
+    this._emitter.name = "view";
 }
 
 BaseView.prototype = {
@@ -122,5 +123,13 @@ BaseView.prototype = {
         if(this.events) {
             this._createEvents(this.events);
         }
-    }
+    },
+
+    on: function(event, context) {
+        return this._emitter.on(event, context);
+    },
+
+    trigger: function(event, data) {
+        return this._emitter.trigger(event, data);
+    },
 };
