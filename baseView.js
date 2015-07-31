@@ -62,7 +62,7 @@ BaseView.prototype = {
 
                     this._initRootNode();
 
-                    $(this.rootNode).on(type, this._searchListener(this));
+                    $(this.rootNode).on(type, this._searchListener(this, this.rootNode));
                 }
 
                 let listener = events[event];
@@ -80,40 +80,52 @@ BaseView.prototype = {
         }
     },
 
-    _searchListener: function(context) {
+    _searchListener: function(context, rootNode) {
         return function(event) {
             event = event.originalEvent; //because use jQuery, temp
             let target = event.target;
-            target = {
-                tag: target.nodeName.toLowerCase(),
-                className: target.className,
-                id: target.id
-            };
-            let eventType = event.type;
 
-            function searchInListeners(target, context) {
-                let listener = context._listeners[eventType][target];
-                if (listener) {
-                    let _resolve;
-                    let promise = new Promise(function(resolve) {
-                        _resolve = resolve;
-                    });
-                    listener._queue.forEach(function(o) {
-                        promise = promise.bind(context).then(o.onFulfill, o.onReject);
-                    });
-                    _resolve(event);
+            function searchByTarget(target, context) {
+                target = {
+                    tag: target.nodeName.toLowerCase(),
+                    className: target.className,
+                    id: target.id
+                };
+                let eventType = event.type;
 
-                    return true;
-                } else {
-                    return false;
+                function searchInListeners(target, context) {
+                    let listener = context._listeners[eventType][target];
+                    if (listener) {
+                        let _resolve;
+                        let promise = new Promise(function (resolve) {
+                            _resolve = resolve;
+                        });
+                        listener._queue.forEach(function (o) {
+                            promise = promise.bind(context).then(o.onFulfill, o.onReject);
+                        });
+                        _resolve(event);
+
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+
+                if (!(searchInListeners(target.tag, context))) {
+                    if (!(searchInListeners(target.className, context))) {
+                        if (!(searchInListeners(target.id, context))) {
+                            event.preventDefault();
+                            return false;
+                        }
+                    }
                 }
             }
 
-            if (!(searchInListeners(target.tag, context))) {
-                if (!(searchInListeners(target.className, context))) {
-                    if (!(searchInListeners(target.id, context))) {
-                        event.preventDefault();
-                        return false;
+            while(target) {
+                if (!searchByTarget(target, context)) {
+                    target = target.parentNode;
+                    if(target === rootNode) {
+                        target = false;
                     }
                 }
             }
