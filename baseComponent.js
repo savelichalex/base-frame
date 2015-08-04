@@ -82,7 +82,7 @@ BaseComponent.prototype = {
                     throw new Error("Signals must be (or return from func) hash object");
                 }
 
-                let emitter = channel === 'global' ? GlobalEmitter : this._emitter;
+                let emitter = channel === 'global' ? this._globalEmitter : this._emitter;
 
                 for (let signal in signals) {
                     if (signals.hasOwnProperty(signal)) {
