@@ -1,5 +1,5 @@
 import util from '../../util';
-import { defer } from '../../util';
+//import { defer } from '../../util';
 import { BaseTreeView } from '../../baseTreeView';
 import BaseModel from '../../baseModel';
 import BaseComponent from '../../baseComponent';
@@ -19,9 +19,11 @@ TreeView.prototype = {
     traverse: function(tree) {
         let self = this,
             root_child = '';
+
         for(let node in tree) {
             if(tree.hasOwnProperty(node)) {
                 let node_child = '';
+                //console.log(tree, node);
                 tree[node].forEach(function(list) {
                     node_child += self.renderListTemplate({
                         name: list
@@ -33,9 +35,10 @@ TreeView.prototype = {
                 });
             }
         }
+
         return this.renderRootTemplate({
             children: root_child
-        })
+        });
     },
 
     events: {

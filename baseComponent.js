@@ -6,11 +6,17 @@ var GlobalEmitter = Emitter();
 GlobalEmitter.name = 'global';
 
 var BaseComponent = function() {
-    this._emitter = Emitter();
-    this._emitter.name = 'local';
 };
 
 BaseComponent.prototype = {
+
+    _emitter: (function() {
+        let emitter = Emitter();
+        emitter.name = 'local';
+        return emitter;
+    }()),
+
+    _globalEmitter: GlobalEmitter,
 
     emit: {},
 
@@ -28,7 +34,7 @@ BaseComponent.prototype = {
                     throw new Error("Slots must be (or return from func) hash object");
                 }
 
-                let emitter = channel === 'global' ? GlobalEmitter : this._emitter;
+                let emitter = channel === 'global' ? this._globalEmitter : this._emitter;
 
                 for (let slot in slots) {
                     if (slots.hasOwnProperty(slot)) {
@@ -129,5 +135,7 @@ BaseComponent.prototype = {
     }
 
 };
+
+BaseComponent.rootClass();
 
 export default BaseComponent;

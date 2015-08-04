@@ -1,5 +1,5 @@
 import util from '../../util';
-import { defer } from '../../util';
+//import { defer } from '../../util';
 import { BaseItemView } from '../../baseItemView';
 import BaseModel from '../../baseModel';
 import BaseComponent from '../../baseComponent';
@@ -25,14 +25,12 @@ View.prototype = {
 View.extends(BaseItemView);
 
 var Model = function() {
-    this.super();
     this.defProperty('name');
 };
 
 Model.extends(BaseModel);
 
 var Test = function() {
-    this.super();
     this.init();
     this.initEntities();
 };
@@ -59,12 +57,12 @@ Test.prototype = {
         }
     },
 
+    model: new Model(),
+
+    view: new View(),
+
     initEntities: function() {
         let self = this;
-
-        this.model = new Model();
-
-        this.view = new View();
 
         this.view.valueChanged = function(value) {
             self.emit.changeValue(value);

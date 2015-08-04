@@ -1,11 +1,16 @@
 import Emitter from './Emitter.js';
 
 var BaseModel = function() {
-    this._emitter = Emitter();
-    this._emitter.name = "model";
 };
 
 BaseModel.prototype = {
+
+    _emitter: (function() {
+        let emitter = Emitter();
+        emitter.name = 'model';
+        return emitter;
+    }()),
+
     _properties: {},
 
     defProperty: function(prop) {
@@ -38,5 +43,7 @@ BaseModel.prototype = {
         return this._properties;
     }
 };
+
+BaseModel.rootClass();
 
 export default BaseModel;

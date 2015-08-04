@@ -1,20 +1,20 @@
-import _ from 'underscore';
-import $ from 'jquery';
-import Promise from 'bluebird';
-
 import diff from 'virtual-dom/diff';
 import patch from 'virtual-dom/patch';
 import createElement from 'virtual-dom/create-element';
 
-import { defer } from './util';
+//import { defer } from './util';
 import Emitter from './Emitter.js';
 
 export function BaseView() {
-    this._emitter = Emitter();
-    this._emitter.name = "view";
 }
 
 BaseView.prototype = {
+
+    _emitter: (function() {
+        let emitter = Emitter();
+        emitter.name = 'view';
+        return emitter;
+    }()),
 
     rootNode: void 0,
 
@@ -22,12 +22,18 @@ BaseView.prototype = {
 
     _vdomNode: void 0,
 
-    _render: function(new_vdom) {
+    __vdom: {
+        diff: diff,
+        patch: patch,
+        createElement: createElement
+    },
+
+    render: function(new_vdom) {
         if(this._vdom) {
-            var patches = diff(this._vdom, new_vdom);
-            this._vdomNode = patch(this._vdomNode, patches);
+            var patches = this.__vdom.diff(this._vdom, new_vdom);
+            this._vdomNode = this.__vdom.patch(this._vdomNode, patches);
         } else {
-            this._vdomNode = createElement(new_vdom);
+            this._vdomNode = this.__vdom.createElement(new_vdom);
         }
         this._vdom = new_vdom;
 
@@ -84,7 +90,6 @@ BaseView.prototype = {
         return function(event) {
             event = event.originalEvent; //because use jQuery, temp
             let target = event.target;
-
             function searchByTarget(target, context) {
                 target = {
                     tag: target.nodeName.toLowerCase(),
@@ -132,7 +137,7 @@ BaseView.prototype = {
         }
     },
 
-    _init: function() {
+    init: function() {
         if(this.events) {
             this._createEvents(this.events);
         }
@@ -146,3 +151,5 @@ BaseView.prototype = {
         return this._emitter.trigger(event, data);
     },
 };
+
+BaseView.rootClass();

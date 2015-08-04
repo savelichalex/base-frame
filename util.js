@@ -1,3 +1,14 @@
+import _ from 'underscore';
+import $ from 'jquery';
+import Promise from 'bluebird';
+
+//Global functions
+window._ = _;
+window.$ = $;
+window.Promise = Promise;
+
+window.defer = defer;
+
 var clone = function(first, second) {
     if(Object.prototype.toString.call(second) !== "[object Object]" ||
         Object.prototype.toString.call(first) !== "[object Object]") {
@@ -53,7 +64,7 @@ Function.prototype.extends = function(Parent) {
         i;
 
     var getFunctionBody = function(func) {
-        var result = /function[\w\s]*\(([\w\s,]*)[\/\*\*\/]*\)[^{]+\{([\s\S]*)\}$/g.exec(func.toString());
+        var result = /function[\w\s\$]*\(([\w\s,]*)[\/\*\*\/]*\)[^{]+\{([\s\S]*)\}$/g.exec(func.toString());
 
         return {
             args: result[1],
@@ -80,45 +91,71 @@ Function.prototype.extends = function(Parent) {
             if (!hasInThisPrototype[parentProtoKeys[i]]) {
                 if(parentProtoKeys[i] === 'changeSuperContext' || parentProtoKeys[i] === 'super'){
                     continue;
-                } else if(parentProtoKeys[i].indexOf('@') !== -1) {
+                } else if(parentProtoKeys[i].indexOf('$') !== -1) {
                     funcInStr = getFunctionBody(Parent.prototype[parentProtoKeys[i]]);
 
-                    this.prototype[parentProtoKeys[i]] = Function(funcInStr.args, funcInStr.body);
+                    this.prototype[parentProtoKeys[i]] = eval.call(null, '(function ' + [parentProtoKeys[i]] + '(' + funcInStr.args + ') {' + funcInStr.body + '})');
+                } else {
+                    funcInStr = getFunctionBody(Parent.prototype[parentProtoKeys[i]]);
+
+                    this.prototype[parentClassName + '$' + parentProtoKeys[i]] =
+                        eval.call(null, '(function ' + parentClassName + '$' + parentProtoKeys[i] + '(' + funcInStr.args + ') {' + funcInStr.body + '})');
+                    this.prototype[parentProtoKeys[i]] = eval.call(null, '(function ' + parentProtoKeys[i] +  '(' + funcInStr.args + ') {' +
+                        'if(!this[this.activeSuperContext + \'$' + parentProtoKeys[i] + '\']) {' +
+                            'var currentActiveSuperContext = this.activeSuperContext;' +
+                            'while(!this[this.activeSuperContext + \'$' + parentProtoKeys[i] + '\'])' +
+                                'this.changeSuperContext();' +
+                            'var res = this[this.activeSuperContext + \'$' + parentProtoKeys[i] + '\'](' + funcInStr.args + ');' +
+                            'this.activeSuperContext = currentActiveSuperContext;' +
+                            'return res;' +
+                        '} else {' +
+                            'return this[this.activeSuperContext + \'$' + parentProtoKeys[i] + '\'](' + funcInStr.args + ');' +
+                        '}' +
+                    '})');
                 }
-
-                funcInStr = getFunctionBody(Parent.prototype[parentProtoKeys[i]]);
-
-                this.prototype[parentClassName + '@' + parentProtoKeys[i]] = Function(funcInStr.args, funcInStr.body);
-                this.prototype[parentProtoKeys[i]] = Function(funcInStr.args, 'return this[\'' + parentClassName + '@' + parentProtoKeys[i] + '\'](' + funcInStr.args + ');');
             }
         } else {
-            this.prototype[parentProtoKeys[i]] = Parent.prototype[parentProtoKeys[i]];
+            if(!hasInThisPrototype[parentProtoKeys[i]]) {
+                this.prototype[parentProtoKeys[i]] = Parent.prototype[parentProtoKeys[i]];
+            }
         }
     }
 
     var parentConstructor = getFunctionBody(Parent.toString());
 
-    this.prototype[parentClassName + '@constructor'] = Function(parentConstructor.args, parentConstructor.body);
+    this.prototype[parentClassName + '$constructor'] = 
+        eval.call(null, '(function ' + parentClassName + '$constructor(' + parentConstructor.args + ') {' + parentConstructor.body + '})');
 
-    this.prototype.super = Function(parentConstructor.args,
+    this.prototype.super = eval.call(null, '(function superFn(' + parentConstructor.args + ') {' +
         'this.changeSuperContext(); ' +
-        'var i = this.activeSuperContext + \'@constructor\';' +
+        'var i = this.activeSuperContext + \'$constructor\';' +
         'this[i](' + parentConstructor.args + ');' +
-        'this.activeSuperContext = \'' + thisClassName + '\';');
+        'this.activeSuperContext = \'' + thisClassName + '\'; })');
+
+    if(Parent.prototype.super) {
+        var superKeys = Object.keys(Parent.prototype.super),
+            superKeysLen = superKeys.length;
+
+        for(i = 0; i < superKeysLen; i++) {
+            this.prototype.super[superKeys[i]] = Parent.prototype.super[superKeys[i]];
+        }
+    }
 
     for(i = 0; i < thisProtoKeysLength; i++) {
         if(typeof this.prototype[thisProtoKeys[i]] === 'function') {
             funcInStr = getFunctionBody(this.prototype[thisProtoKeys[i]]);
 
-            this.prototype[thisClassName + '@' + thisProtoKeys[i]] = Function(funcInStr.args, funcInStr.body);
-            this.prototype[thisProtoKeys[i]] = Function(funcInStr.args, 'return this[\'' + thisClassName + '@' + thisProtoKeys[i] + '\'](' + funcInStr.args + ');');
-
-            this.prototype.super[thisProtoKeys[i]] = Function(
+            this.prototype[thisClassName + '$' + thisProtoKeys[i]] = 
+                eval.call(null, '(function ' + thisClassName + '$' + thisProtoKeys[i] + '(' +funcInStr.args + ') {' + funcInStr.body + '})');
+            this.prototype[thisProtoKeys[i]] = 
+                eval.call(null, '(function ' + thisProtoKeys[i] + '(' + funcInStr.args + ') {' +
+                    'return this[this.activeSuperContext + \'$' + thisProtoKeys[i] + '\'](' + funcInStr.args + '); })');
+            this.prototype.super[thisProtoKeys[i]] = eval.call(null, '(function super$' + thisProtoKeys[i] + '(' + funcInStr.args + ') {' +
                 'this.changeSuperContext(); ' +
-                'var i = this.activeSuperContext + \'@' + parentProtoKeys[i] + '\';' +
+                'var i = this.activeSuperContext + \'$' + thisProtoKeys[i] + '\';' +
                 'var res = this[i](' + funcInStr.args + ');' +
                 'this.activeSuperContext = \'' + thisClassName + '\';' +
-                'return res;'
+                'return res; })'
             );
         }
     }
@@ -147,17 +184,17 @@ Function.prototype.rootClass = function() {
             funcInStr = getFunctionBody(this.prototype[thisProtoKeys[i]]);
 
             if(funcInStr.args.length === 0) {
-                this.prototype[thisClassName + '@' + thisProtoKeys[i]] = Function(funcInStr.body);
-                this.prototype[thisProtoKeys[i]] = Function('return this[\'' + thisClassName + '@' + thisProtoKeys[i] + '\']();');
+                this.prototype[thisClassName + '$' + thisProtoKeys[i]] = Function(funcInStr.body);
+                this.prototype[thisProtoKeys[i]] = Function('return this[\'' + thisClassName + '$' + thisProtoKeys[i] + '\']();');
             } else {
-                this.prototype[thisClassName + '@' + thisProtoKeys[i]] = Function(funcInStr.args, funcInStr.body);
-                this.prototype[thisProtoKeys[i]] = Function(funcInStr.args, 'return this[\'' + thisClassName + '@' + thisProtoKeys[i] + '\'](' + funcInStr.args + ');');
+                this.prototype[thisClassName + '$' + thisProtoKeys[i]] = Function(funcInStr.args, funcInStr.body);
+                this.prototype[thisProtoKeys[i]] = Function(funcInStr.args, 'return this[\'' + thisClassName + '$' + thisProtoKeys[i] + '\'](' + funcInStr.args + ');');
             }
         }
     }
 };
 
-export function defer(onFulfill, onReject) {
+function defer(onFulfill, onReject) {
     return {
         _queue: [{
             onFulfill: onFulfill,

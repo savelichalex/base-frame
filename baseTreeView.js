@@ -4,7 +4,7 @@ import VNode from 'virtual-dom/vnode/vnode';
 import VText from 'virtual-dom/vnode/vtext';
 import convertHTML from 'html-to-vdom';
 
-var convert = convertHTML({
+window.convert = convertHTML({
     VNode: VNode,
     VText: VText
 });
@@ -12,7 +12,6 @@ var convert = convertHTML({
 import { BaseView } from './baseView';
 
 export function BaseTreeView() {
-    this.super();
 }
 
 BaseTreeView.prototype = {
@@ -30,7 +29,7 @@ BaseTreeView.prototype = {
 
         let new_vdom = convert(this.traverse(tree));
 
-        this._render(new_vdom)
+        this.super.render.call(this, new_vdom)
     },
 
     init: function() {
@@ -45,11 +44,15 @@ BaseTreeView.prototype = {
         this.renderNodeTemplate = _.template(this.nodeTemplate.trim());
         this.renderListTemplate = _.template(this.listTemplate.trim());
 
-        this._init();
+        this.super.init.call(this);
     },
 
     traverse: function(tree) {
-        throw new Error('Traverse method must be overrated');
+        var curAC = this.activeSuperContext;
+        this.activeSuperContext = this.inheritChain[this.inheritChain.length - 1];
+        var res = this.traverse(tree);
+        this.activeSuperContext = curAC;
+        return res;
     }
 
 };
