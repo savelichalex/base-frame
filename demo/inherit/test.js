@@ -20,9 +20,6 @@ function Test2() {
 
 Test2.prototype = {
     b: 2,
-    getA: function() {
-        return this.super.getA.call(this);
-    },
     getB: function() {
         return this.getA();
     },
@@ -40,11 +37,8 @@ function Test3() {
 
 Test3.prototype = {
     d: 4,
-    getA: function() {
-        return this.super.getA.call(this);
-    },
     getB: function() {
-        return 3;
+        return this.super.getB.call(this);
     }
 };
 
@@ -54,4 +48,4 @@ var test = new Test3();
 
 console.dir(test);
 
-console.log(test.getD());
+console.log(test.getA());

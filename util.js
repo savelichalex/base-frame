@@ -91,10 +91,10 @@ Function.prototype.extends = function(Parent) {
             if (!hasInThisPrototype[parentProtoKeys[i]]) {
                 if(parentProtoKeys[i] === 'changeSuperContext' || parentProtoKeys[i] === 'super'){
                     continue;
-                } else if(parentProtoKeys[i].indexOf('$') !== -1) {
+                } else if(parentProtoKeys[i].indexOf('$') !== -1 || Parent.prototype[parentProtoKeys[i]].inherited) {
                     funcInStr = getFunctionBody(Parent.prototype[parentProtoKeys[i]]);
 
-                    this.prototype[parentProtoKeys[i]] = eval.call(null, '(function ' + [parentProtoKeys[i]] + '(' + funcInStr.args + ') {' + funcInStr.body + '})');
+                    this.prototype[parentProtoKeys[i]] = eval.call(null, '(function ' + parentProtoKeys[i] + '(' + funcInStr.args + ') {' + funcInStr.body + '})');
                 } else {
                     funcInStr = getFunctionBody(Parent.prototype[parentProtoKeys[i]]);
 
@@ -112,6 +112,8 @@ Function.prototype.extends = function(Parent) {
                             'return this[this.activeSuperContext + \'$' + parentProtoKeys[i] + '\'](' + funcInStr.args + ');' +
                         '}' +
                     '})');
+
+                    this.prototype[parentProtoKeys[i]].inherited = true;
                 }
             }
         } else {

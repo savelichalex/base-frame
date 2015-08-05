@@ -1,5 +1,3 @@
-import _ from 'underscore';
-
 import VNode from 'virtual-dom/vnode/vnode';
 import VText from 'virtual-dom/vnode/vtext';
 import convertHTML from 'html-to-vdom';
