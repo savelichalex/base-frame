@@ -149,6 +149,10 @@ BaseView.prototype = {
         return this._emitter.on(event, context);
     },
 
+    once: function(event, context) {
+        return this._emitter.once(event, context);
+    },
+
     trigger: function(event, data) {
         return this._emitter.trigger(event, data);
     },
