@@ -40,6 +40,8 @@ BaseView.prototype = {
         this._initRootNode();
 
         this.rootNode.appendChild(this._vdomNode);
+
+        this.trigger('renderComplete');
     },
 
     _initRootNode: function() {

@@ -27,7 +27,8 @@ BaseTreeView.prototype = {
 
         let new_vdom = convert(this.traverse(tree));
 
-        this.super.render.call(this, new_vdom)
+        this.super.render.call(this, new_vdom);
+        this.activeSuperContext = this.inheritChain[this.inheritChain.length - 1];
     },
 
     init: function() {
