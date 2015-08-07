@@ -118,9 +118,9 @@ BaseView.prototype = {
                     }
                 }
 
-                if (!(searchInListeners(target.tag, context))) {
-                    if (!(searchInListeners(target.className, context))) {
-                        if (!(searchInListeners(target.id, context))) {
+                if (!(searchInListeners(target.tag, context))) {  //TODO: not serach when target does not have class or id
+                    if (!(searchInListeners('.' + target.className, context))) { //TODO: multyple classes
+                        if (!(searchInListeners('#' + target.id, context))) {
                             event.preventDefault();
                             return false;
                         }
@@ -132,7 +132,7 @@ BaseView.prototype = {
                 if (!searchByTarget(target, context)) {
                     target = target.parentNode;
                     if(target === rootNode) {
-                        target = false;
+                        break;
                     }
                 }
             }

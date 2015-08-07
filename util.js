@@ -118,7 +118,10 @@ if(typeof Function.prototype.extends !== 'function')
                 }
             } else {
                 if(!hasInThisPrototype[parentProtoKeys[i]] && parentProtoKeys[i] !== 'inheritChain') {
-                    this.prototype[parentProtoKeys[i]] = Parent.prototype[parentProtoKeys[i]];
+                    if(Object.prototype.toString.call(Parent.prototype[parentProtoKeys[i]]) !== "[object Object]") {
+                        this.prototype[parentProtoKeys[i]] = {};
+                        clone(Parent.prototype[parentProtoKeys[i]], this.prototype[parentProtoKeys[i]]);
+                    }
                 }
             }
         }
