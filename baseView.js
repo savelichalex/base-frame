@@ -62,8 +62,13 @@ BaseView.prototype = {
 
         for(let event in events) {
             if(events.hasOwnProperty(event)) {
-                let type = event.split(' ')[0].toLowerCase();
-                let target = event.split(' ')[1];
+                let event_arr = event.split(' ');
+                let type = event_arr[0];
+                let target = event_arr[1];
+                let prevent = false;
+                if(event_arr.length > 2 && event_arr[2] === 'preventDefault') {
+                    prevent = true;
+                }
 
                 if (!this._listeners[type]) {
                     this._listeners[type] = {};
@@ -84,6 +89,7 @@ BaseView.prototype = {
                 }
 
                 this._listeners[type][target] = listener;
+                this._listeners[type][target].prevent = prevent;
             }
         }
     },
@@ -103,6 +109,9 @@ BaseView.prototype = {
                 function searchInListeners(target, context) {
                     let listener = context._listeners[eventType][target];
                     if (listener) {
+                        if(listener.prevent) {
+                            event.preventDefault();
+                        }
                         let _resolve;
                         let promise = new Promise(function (resolve) {
                             _resolve = resolve;
@@ -149,6 +158,7 @@ BaseView.prototype = {
                     break;
                 }
             }
+            event.stopPropagation();
         }
     },
 
