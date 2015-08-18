@@ -118,22 +118,35 @@ BaseView.prototype = {
                     }
                 }
 
-                if (!(searchInListeners(target.tag, context))) {  //TODO: not serach when target does not have class or id
-                    if (!(searchInListeners('.' + target.className, context))) { //TODO: multyple classes
-                        if (!(searchInListeners('#' + target.id, context))) {
-                            event.preventDefault();
-                            return false;
+                var hasListener = false;
+                if (!(searchInListeners(target.tag, context))) {  //TODO: not search when target does not have class or id
+                    if(target.className && (typeof target.className === 'string')) {
+                        if (searchInListeners('.' + target.className, context)) { //TODO: multyple classes
+                            hasListener = true;
                         }
                     }
+
+                    if(target.id && !hasListener) {
+                        if (searchInListeners('#' + target.id, context)) {
+                            hasListener = true;
+                        }
+                    }
+                } else {
+                    hasListener = true;
                 }
+
+                return hasListener;
             }
 
             while(target) {
-                if (!searchByTarget(target, context)) {
-                    target = target.parentNode;
+                if (!searchByTarget(target, context)) { //TODO: for example mouseout target is not rootNode or his children (not search)
                     if(target === rootNode) {
                         break;
+                    } else {
+                        target = target.parentNode;
                     }
+                } else {
+                    break;
                 }
             }
         }
