@@ -46,7 +46,7 @@ BaseView.prototype = {
 
     _initRootNode: function() {
         if(!this.rootNode) {
-            throw new Error('RootNode not specified');
+            throw new Error('RootNode not specified in ' + this.inheritChain[this.inheritChain.length - 1]);
         }
         if(_.isString(this.rootNode)) {
             this.rootNode = $(this.rootNode)[0];
@@ -130,9 +130,12 @@ BaseView.prototype = {
                 var hasListener = false;
                 if (!(searchInListeners(target.tag, context))) {  //TODO: not search when target does not have class or id
                     if(target.className && (typeof target.className === 'string')) {
-                        if (searchInListeners('.' + target.className, context)) { //TODO: multyple classes
-                            hasListener = true;
-                        }
+                        var classes = target.className.split(' ');
+                        classes.forEach(function(className) {
+                            if (searchInListeners('.' + className, context)) { //TODO: multyple classes
+                                hasListener = true;
+                            }
+                        });
                     }
 
                     if(target.id && !hasListener) {

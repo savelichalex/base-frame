@@ -1,6 +1,6 @@
 import VNode from 'virtual-dom/vnode/vnode';
 import VText from 'virtual-dom/vnode/vtext';
-import convertHTML from 'html-to-vdom';
+import convertHTML from 'html-to-vdom-svg-fix';
 
 window.convert = convertHTML({
     VNode: VNode,
@@ -49,6 +49,7 @@ BaseCollectionView.prototype = {
         if(!collection) {
             return '';
         }
+
         if(Object.prototype.toString.call(collection) !== '[object Array]') {
             throw new Error('Collection must be an Array');
         }
@@ -78,7 +79,7 @@ BaseCollectionView.prototype = {
         let result_str = '';
 
         for( ; i < length; i++) {
-            result_str += filterFunc(collection[i]);
+            result_str += filterFunc.call(this, collection[i]);
         }
 
         return result_str;

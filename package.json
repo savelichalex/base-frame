@@ -1,6 +1,6 @@
 {
   "name": "base-frame",
-  "version": "0.1.6",
+  "version": "0.1.12",
   "description": "Base classes for creation your own application",
   "main": "index.js",
   "scripts": {
@@ -21,10 +21,10 @@
   "dependencies": {
     "bluebird": "2.9.*",
     "virtual-dom": "~2.1.0",
-    "html-to-vdom": "~0.7.0",
     "underscore": "1.8.*",
     "backbone-events-standalone": "~0.2.7",
-    "jquery": "2.1.*"
+    "jquery": "2.1.*",
+    "html-to-vdom-svg-fix": "~0.7.1"
   },
   "devDependencies": {
     "babel-core": "5.8.*",

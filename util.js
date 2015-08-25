@@ -1,13 +1,13 @@
 import _ from 'underscore';
-import $ from 'jquery';
-import Promise from 'bluebird';
+ import $ from 'jquery';
+ import Promise from 'bluebird';
 
-//Global functions
-window._ = _;
-window.$ = $;
-window.Promise = Promise;
+ //Global functions
+ window._ = _;
+ window.$ = $;
+ window.Promise = Promise;
 
-window.defer = defer;
+ window.defer = defer;
 
 var clone = function(first, second) {
     if(Object.prototype.toString.call(second) !== "[object Object]" ||
@@ -15,7 +15,7 @@ var clone = function(first, second) {
         throw new Error("variables must be type of object");
     }
 
-    for(let i in first) {
+    for(var i in first) {
         if(first.hasOwnProperty(i)) {
             second[i] = first[i];
         }
@@ -45,6 +45,12 @@ if(typeof Function.prototype.extends !== 'function')
             parentClassName = Parent.name,
             thisProtoKeys = Object.keys(this.prototype),
             parentProtoKeys = Object.keys(Parent.prototype);
+
+        if(!thisClassName && !parentClassName) { //if function.name not working
+            var functionNameRegExp = /^function\s*([^\s(]+)/;
+            thisClassName = functionNameRegExp.exec(this.toString())[1];
+            parentClassName = functionNameRegExp.exec(Parent.toString())[1];
+        }
 
         var hasInThisPrototype = (function(thisProto, parentProto) {
             var intersection = intersect(parentProto, thisProto),
@@ -172,6 +178,11 @@ if(typeof Function.prototype.rootClass !== 'function')
             thisProtoKeys = Object.keys(this.prototype),
             thisProtoKeysLength = thisProtoKeys.length,
             i, funcInStr;
+
+        if(!thisClassName) { //if function.name not working
+            var functionNameRegExp = /^function\s*([^\s(]+)/;
+            thisClassName = functionNameRegExp.exec(this.toString())[1];
+        }
 
         var getFunctionBody = function(func) {
             var result = /function[\w\s]*\(([\w\s,]*)\)[^{]+\{([\s\S]*)\}$/.exec(func.toString());
