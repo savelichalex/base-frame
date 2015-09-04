@@ -1,13 +1,26 @@
 import _ from 'underscore';
- import $ from 'jquery';
- import Promise from 'bluebird';
+import $ from 'jquery';
+import Promise from 'bluebird';
 
- //Global functions
- window._ = _;
- window.$ = $;
- window.Promise = Promise;
+//Global functions
+window._ = _;
+window.$ = $;
+window.Promise = Promise;
 
- window.defer = defer;
+window.defer = defer;
+
+window.addEvent = addEvent;
+
+function addEvent(elem, event, fn) {
+    if (elem.addEventListener) {
+        elem.addEventListener(event, fn, false);
+    } else {
+        elem.attachEvent("on" + event, function() {
+            // set the this pointer same as addEventListener when fn is called
+            return(fn.call(elem, window.event));
+        });
+    }
+}
 
 var clone = function(first, second) {
     if(Object.prototype.toString.call(second) !== "[object Object]" ||

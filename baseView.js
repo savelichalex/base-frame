@@ -75,7 +75,7 @@ BaseView.prototype = {
 
                     this._initRootNode();
 
-                    $(this.rootNode).on(type, this._searchListener(this, this.rootNode));
+                    addEvent(this.rootNode, type, this._searchListener(this, this.rootNode));
                 }
 
                 let listener = events[event];
@@ -96,7 +96,7 @@ BaseView.prototype = {
 
     _searchListener: function(context, rootNode) {
         return function(event) {
-            event = event.originalEvent; //because use jQuery, temp
+            //event = event.originalEvent; //because use jQuery, temp
             let target = event.target;
             function searchByTarget(target, context) {
                 target = {

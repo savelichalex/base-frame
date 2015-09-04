@@ -11,7 +11,7 @@ BaseModel.prototype = {
         emitter: Emitter
     },
 
-    _properties: {},
+    _properties: void 0,
 
     defProperty: function(prop, value) {
         var self = this;
@@ -50,6 +50,8 @@ BaseModel.prototype = {
     init: function() {
         this._emitter = this._util.emitter();
         this._emitter.name = this.inheritChain[ this.inheritChain.length - 1 ];
+
+        this._properties = {};
     }
 };
 

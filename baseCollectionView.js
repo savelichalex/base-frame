@@ -64,10 +64,10 @@ BaseCollectionView.prototype = {
             filterFunc;
 
         if(classHasFilterFunc) {
-            filterFunc = function(item) {
+            filterFunc = function(item, index) {
                 var curAC = this.activeSuperContext;
                 this.activeSuperContext = this.inheritChain[this.inheritChain.length - 1];
-                var res = this.filter(item);
+                var res = this.filter(item, index);
                 this.activeSuperContext = curAC;
                 return res;
             }
@@ -83,7 +83,7 @@ BaseCollectionView.prototype = {
         let result_str = '';
 
         for( ; i < length; i++) {
-            result_str += filterFunc.call(this, collection[i]);
+            result_str += filterFunc.call(this, collection[i], i);
         }
 
         return result_str;
