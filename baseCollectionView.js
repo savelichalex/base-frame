@@ -29,8 +29,12 @@ BaseCollectionView.prototype = {
     },
 
     init: function() {
-        if(!this.template && !this.templates) {
-            throw new Error('Template not specified');
+        if(!this.templates) {
+            throw new Error('Templates not specified');
+        }
+
+        if(!this.template) {
+            this.template = '<div><%= collection %></div>';
         }
 
         let templates = this.templates;

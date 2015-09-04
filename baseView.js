@@ -10,11 +10,7 @@ export function BaseView() {
 
 BaseView.prototype = {
 
-    _emitter: (function() {
-        let emitter = Emitter();
-        emitter.name = 'view';
-        return emitter;
-    }()),
+    _emitter: void 0,
 
     rootNode: void 0,
 
@@ -22,11 +18,17 @@ BaseView.prototype = {
 
     _vdomNode: void 0,
 
+    _util: {
+        emitter: Emitter
+    },
+
     __vdom: {
         diff: diff,
         patch: patch,
         createElement: createElement
     },
+
+    _listeners: void 0,
 
     render: function(new_vdom) {
         if(this._vdom) {
@@ -52,8 +54,6 @@ BaseView.prototype = {
             this.rootNode = $(this.rootNode)[0];
         }
     },
-
-    _listeners: {},
 
     _createEvents: function(events) {
         if(!(_.isObject(events))) {
@@ -166,9 +166,14 @@ BaseView.prototype = {
     },
 
     init: function() {
+        this._listeners = {};
+
         if(this.events) {
             this._createEvents(this.events);
         }
+
+        this._emitter = this._util.emitter();
+        this._emitter.name = this.inheritChain[ this.inheritChain.length - 1 ];
     },
 
     on: function(event, context) {

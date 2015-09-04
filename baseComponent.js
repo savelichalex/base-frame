@@ -10,11 +10,11 @@ var BaseComponent = function() {
 
 BaseComponent.prototype = {
 
-    _emitter: (function() {
-        let emitter = Emitter();
-        emitter.name = 'local';
-        return emitter;
-    }()),
+    _emitter: void 0,
+
+    _util: {
+        emitter: Emitter
+    },
 
     _globalEmitter: GlobalEmitter,
 
@@ -130,6 +130,10 @@ BaseComponent.prototype = {
     },
 
     init: function() {
+        this._emitter = this._util.emitter();
+        this._emitter.name = this.inheritChain[ this.inheritChain.length - 1 ] + '-local';
+
+
         this._slots(this.slots);
         this._signals(this.signals);
     }

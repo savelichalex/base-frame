@@ -5,16 +5,20 @@ var BaseModel = function() {
 
 BaseModel.prototype = {
 
-    _emitter: (function() {
-        let emitter = Emitter();
-        emitter.name = 'model';
-        return emitter;
-    }()),
+    _emitter: void 0,
+
+    _util: {
+        emitter: Emitter
+    },
 
     _properties: {},
 
-    defProperty: function(prop) {
+    defProperty: function(prop, value) {
         var self = this;
+
+        if(typeof value !== 'undefined') {
+            this._properties[prop] = value;
+        }
 
         Object.defineProperty(this, prop, {
             get: function() { return self._properties[prop]; },
@@ -41,6 +45,11 @@ BaseModel.prototype = {
 
     getModel: function() {
         return this._properties;
+    },
+
+    init: function() {
+        this._emitter = this._util.emitter();
+        this._emitter.name = this.inheritChain[ this.inheritChain.length - 1 ];
     }
 };
 
