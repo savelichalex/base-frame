@@ -1,8 +1,8 @@
 import diff from 'virtual-dom/diff';
 import patch from 'virtual-dom/patch';
-import createElement from 'virtual-dom/create-element';
+import createElement from 'virtual-dom/create';
 
-//import { defer } from './util';
+import { defer, addEvent } from './util';
 import Emitter from './Emitter.js';
 
 export function BaseView() {
@@ -19,7 +19,9 @@ BaseView.prototype = {
     _vdomNode: void 0,
 
     _util: {
-        emitter: Emitter
+        emitter: Emitter,
+        defer: defer,
+        addEvent: addEvent
     },
 
     __vdom: {
@@ -75,14 +77,14 @@ BaseView.prototype = {
 
                     this._initRootNode();
 
-                    addEvent(this.rootNode, type, this._searchListener(this, this.rootNode));
+                    this._util.addEvent( this.rootNode, type, this._searchListener( this, this.rootNode ) );
                 }
 
                 let listener = events[event];
 
                 if (!(_.isObject(listener) && listener._queue)) {
                     if (_.isFunction(listener)) {
-                        listener = defer(listener);
+                        listener = this._util.defer( listener );
                     } else {
                         throw new Error('Callback must be a function');
                     }

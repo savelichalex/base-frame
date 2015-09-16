@@ -1,4 +1,4 @@
-import BackboneEvents from 'backbone-events-standalone';
+import FastEmitter from 'fastemitter-with-context';
 import _ from 'underscore';
 import Promise from 'bluebird';
 
@@ -7,9 +7,7 @@ import Promise from 'bluebird';
 var Emitter = function() {
     var emitter, emitterProxy;
 
-    emitter = {};
-
-    BackboneEvents.mixin(emitter);
+    emitter = new FastEmitter();
 
     emitterProxy = {
 

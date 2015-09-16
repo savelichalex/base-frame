@@ -1,5 +1,5 @@
-import VNode from 'virtual-dom/vnode/vnode';
-import VText from 'virtual-dom/vnode/vtext';
+import VNode from 'virtual-dom/VNode';
+import VText from 'virtual-dom/VText';
 import convertHTML from 'html-to-vdom-svg-fix';
 
 window.convert = convertHTML({

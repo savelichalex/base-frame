@@ -1,17 +1,4 @@
-import _ from 'underscore';
-import $ from 'jquery';
-import Promise from 'bluebird';
-
-//Global functions
-window._ = _;
-window.$ = $;
-window.Promise = Promise;
-
-window.defer = defer;
-
-window.addEvent = addEvent;
-
-function addEvent(elem, event, fn) {
+export function addEvent ( elem, event, fn ) {
     if (elem.addEventListener) {
         elem.addEventListener(event, fn, false);
     } else {
@@ -223,7 +210,7 @@ if(typeof Function.prototype.rootClass !== 'function')
         }
     };
 
-function defer(onFulfill, onReject) {
+export function defer ( onFulfill, onReject ) {
     return {
         _queue: [{
             onFulfill: onFulfill,
