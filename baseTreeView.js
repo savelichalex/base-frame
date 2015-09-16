@@ -1,12 +1,3 @@
-import VNode from 'virtual-dom/VNode';
-import VText from 'virtual-dom/VText';
-import convertHTML from 'html-to-vdom-svg-fix';
-
-window.convert = convertHTML({
-    VNode: VNode,
-    VText: VText
-});
-
 import { BaseView } from './baseView';
 
 export function BaseTreeView() {
@@ -25,7 +16,7 @@ BaseTreeView.prototype = {
             throw new Error('RootNode not specified');
         }
 
-        let new_vdom = convert(this.traverse(tree));
+        let new_vdom = this.traverse(tree);
 
         this.super.render.call(this, new_vdom);
         this.activeSuperContext = this.inheritChain[this.inheritChain.length - 1];
@@ -36,12 +27,8 @@ BaseTreeView.prototype = {
             throw new Error('Templates not specified');
         }
         if(!this.rootTemplate) {
-            this.rootTemplate = '<div><%= children %></div>';
+            throw new Error('Root template not specified');
         }
-
-        this.renderRootTemplate = _.template(this.rootTemplate.trim());
-        this.renderNodeTemplate = _.template(this.nodeTemplate.trim());
-        this.renderListTemplate = _.template(this.listTemplate.trim());
 
         this.super.init.call(this);
     },

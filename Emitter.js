@@ -1,5 +1,4 @@
 import FastEmitter from 'fastemitter-with-context';
-import _ from 'underscore';
 import Promise from 'bluebird';
 
 "use strict";

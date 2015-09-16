@@ -1,12 +1,3 @@
-import VNode from 'virtual-dom/VNode';
-import VText from 'virtual-dom/VText';
-import convertHTML from 'html-to-vdom-svg-fix';
-
-window.convert = convertHTML({
-    VNode: VNode,
-    VText: VText
-});
-
 import { BaseView } from './baseView';
 
 export function BaseCollectionView() {
@@ -21,9 +12,9 @@ BaseCollectionView.prototype = {
             throw new Error('RootNode not specified');
         }
 
-        let new_vdom = convert(this._templateCachedFn({
+        let new_vdom = this.renderTpl(this.template, {
             collection: this.traverse(collection)
-        }));
+        });
 
         this.super.render.call(this, new_vdom);
     },
@@ -34,17 +25,8 @@ BaseCollectionView.prototype = {
         }
 
         if(!this.template) {
-            this.template = '<div><%= collection %></div>';
+            throw new Error('Template not specified');
         }
-
-        let templates = this.templates;
-        for(let template in templates) {
-            if(templates.hasOwnProperty(template)) {
-                templates[template] = _.template(templates[template].trim());
-            }
-        }
-
-        this._templateCachedFn = _.template(this.template);
 
         this.super.init.call(this);
     },
@@ -75,18 +57,18 @@ BaseCollectionView.prototype = {
             filterFunc = (function() {
                 let firstInCol = Object.keys(this.templates)[0];
                 return function(item) {
-                    return this.templates[firstInCol](item);
+                    return this.renderTpl(this.templates[firstInCol], item);
                 }
             }());
         }
 
-        let result_str = '';
+        let result = [];
 
         for( ; i < length; i++) {
-            result_str += filterFunc.call(this, collection[i], i);
+            result.push( filterFunc.call(this, collection[i], i) );
         }
 
-        return result_str;
+        return result;
     },
 
     checkClassHasFilterFunc: function() {

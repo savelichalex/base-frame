@@ -1,6 +1,11 @@
-import diff from 'virtual-dom/diff';
-import patch from 'virtual-dom/patch';
-import createElement from 'virtual-dom/create';
+import vdom from 'virtual-dom';
+//import diff from 'virtual-dom/diff';
+//import patch from 'virtual-dom/patch';
+//import createElement from 'virtual-dom/create';
+let diff = vdom.diff;
+let patch = vdom.patch;
+let createElement = vdom.create;
+let h = vdom.h;
 
 import { defer, addEvent } from './util';
 import Emitter from './Emitter.js';
@@ -27,10 +32,16 @@ BaseView.prototype = {
     __vdom: {
         diff: diff,
         patch: patch,
-        createElement: createElement
+        createElement: createElement,
+        h: h
     },
 
     _listeners: void 0,
+
+    renderTpl: function ( func, obj ) {
+        var h = this.__vdom.h;
+        return eval( func( obj ) );
+    },
 
     render: function(new_vdom) {
         if(this._vdom) {

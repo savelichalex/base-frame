@@ -1,6 +1,6 @@
 var path = require( 'path' );
 module.exports = {
-    entry: './app/app.js',
+    entry: './index.js',
     output: {
         path: __dirname + '/dist',
         filename: 'base-frame.js'
@@ -14,7 +14,12 @@ module.exports = {
         loaders: [
             {
                 test: /\.js/,
-                loader: 'babel-loader'
+                loader: 'babel-loader',
+                exclude: /node_modules/
+            },
+            {
+                test: /\.json/,
+                loader: 'json-loader'
             }
         ]
     }

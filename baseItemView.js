@@ -1,12 +1,3 @@
-import VNode from 'virtual-dom/VNode';
-import VText from 'virtual-dom/VText';
-import convertHTML from 'html-to-vdom-svg-fix';
-
-window.convert = convertHTML({
-    VNode: VNode,
-    VText: VText
-});
-
 import { BaseView } from './baseView';
 
 export function BaseItemView() {
@@ -21,7 +12,7 @@ BaseItemView.prototype = {
             throw new Error('RootNode not specified');
         }
 
-        let new_vdom = convert(this._templateCachedFn(model));
+        let new_vdom = this.renderTpl(this.template, model);
 
         this.super.render.call(this, new_vdom);
     },
@@ -30,7 +21,7 @@ BaseItemView.prototype = {
         if(!this.template) {
             throw new Error('Template not specified');
         }
-        this._templateCachedFn = _.template(this.template);
+
         this.super.init.call(this);
     }
 
