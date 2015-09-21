@@ -1,5 +1,7 @@
 import Emitter from './Emitter.js';
 
+import { defer } from './util';
+
 'use strict';
 
 var GlobalEmitter = Emitter();
@@ -57,6 +59,10 @@ BaseComponent.prototype = {
                             case 'command':
                                 promise = emitter.commandFrom(event, this);
                                 break;
+                        }
+
+                        if ( Object.prototype.toString.call( slots[ slot ] ) === '[object Function]' ) {
+                            slots[ slot ] = defer( slots[ slot ] );
                         }
 
                         slots[slot]._queue.forEach(function (cb) {

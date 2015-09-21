@@ -38,7 +38,7 @@ var Emitter = function() {
 
         trigger: function (event, data) {
             console.log(event, this.name);
-            emitter.trigger(event, data);
+            emitter.emit( event, data );
         },
 
         once: function (event, context) {

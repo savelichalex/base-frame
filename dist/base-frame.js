@@ -47,14 +47,15 @@
 	'use strict';
 
 	module.exports = {
-	    baseCollectionView: __webpack_require__(11),
-	    baseComponent: __webpack_require__(12),
-	    baseItemView: __webpack_require__(13),
-	    baseModel: __webpack_require__(14),
-	    baseTreeView: __webpack_require__(1),
-	    baseView: __webpack_require__(2),
+		BaseCollectionView: __webpack_require__( 1 ),
+		BaseComponent: __webpack_require__( 11 ),
+		BaseItemView: __webpack_require__( 12 ),
+		BaseModel: __webpack_require__( 13 ),
+		BaseTreeView: __webpack_require__( 14 ),
+		BaseView: __webpack_require__( 2 ),
 	    Emitter: __webpack_require__(5),
-	    util: __webpack_require__(4)
+		util: __webpack_require__( 4 ),
+		defer: __webpack_require__( 4 ).defer
 	};
 
 /***/ },
@@ -66,53 +67,105 @@
 	Object.defineProperty(exports, '__esModule', {
 	    value: true
 	});
-	exports.BaseTreeView = BaseTreeView;
+
+		function _interopRequireDefault ( obj ) {
+			return obj && obj.__esModule ? obj : { 'default': obj };
+		}
 
 	var _baseView = __webpack_require__(2);
 
-	function BaseTreeView() {}
+		var _baseView2 = _interopRequireDefault( _baseView );
 
-	BaseTreeView.prototype = {
+		function BaseCollectionView () {
+		}
 
-	    rootTemplate: void 0,
+		BaseCollectionView.prototype = {
 
-	    nodeTemplate: void 0,
+			template: void 0,
 
-	    listTemplate: void 0,
-
-	    render: function render(tree) {
+			render: function render ( collection ) {
 	        if (!this.rootNode) {
 	            throw new Error('RootNode not specified');
 	        }
 
-	        var new_vdom = this.traverse(tree);
+				var new_vdom = this.renderTpl( this.template, {
+					collection: this.traverse( collection )
+				} );
 
 	        this['super'].render.call(this, new_vdom);
-	        this.activeSuperContext = this.inheritChain[this.inheritChain.length - 1];
 	    },
 
 	    init: function init() {
-	        if (!this.nodeTemplate && !this.listTemplate) {
+			if ( !this.templates ) {
 	            throw new Error('Templates not specified');
 	        }
-	        if (!this.rootTemplate) {
-	            throw new Error('Root template not specified');
+
+			if ( !this.template ) {
+				throw new Error( 'Template not specified' );
 	        }
 
 	        this['super'].init.call(this);
 	    },
 
-	    traverse: function traverse(tree) {
-	        var curAC = this.activeSuperContext;
+			traverse: function traverse ( collection ) {
+				if ( !collection ) {
+					return '';
+				}
+
+				if ( Object.prototype.toString.call( collection ) !== '[object Array]' ) {
+					throw new Error( 'Collection must be an Array' );
+				}
+
+				var length = collection.length,
+					i = 0,
+					classHasFilterFunc = this.checkClassHasFilterFunc(),
+					filterFunc = undefined;
+
+				if ( classHasFilterFunc ) {
+					filterFunc = function ( item, index ) {
+						var curAC = this.activeSuperContext;
+						this.activeSuperContext = this.inheritChain[ this.inheritChain.length - 1 ];
+						var res = this.filter( item, index );
+						this.activeSuperContext = curAC;
+						return res;
+					};
+				} else {
+					filterFunc = (function () {
+						var firstInCol = Object.keys( this.templates )[ 0 ];
+						return function ( item ) {
+							return this.renderTpl( this.templates[ firstInCol ], item );
+						};
+					})();
+				}
+
+				var result = [];
+
+				for ( ; i < length; i++ ) {
+					result.push( filterFunc.call( this, collection[ i ], i ) );
+				}
+
+				return result;
+			},
+
+			checkClassHasFilterFunc: function checkClassHasFilterFunc () {
+				var curAC = this.activeSuperContext,
+					flag = false;
+
 	        this.activeSuperContext = this.inheritChain[this.inheritChain.length - 1];
-	        var res = this.traverse(tree);
+				if ( this[ this.activeSuperContext + '$filter' ] ) {
+					flag = true;
+				}
 	        this.activeSuperContext = curAC;
-	        return res;
+
+				return flag;
 	    }
 
 	};
 
-	BaseTreeView['extends'](_baseView.BaseView);
+		BaseCollectionView[ 'extends' ]( _baseView2[ 'default' ] );
+
+		exports[ 'default' ] = BaseCollectionView;
+		module.exports = exports[ 'default' ];
 
 /***/ },
 /* 2 */
@@ -123,7 +176,6 @@
 	Object.defineProperty(exports, '__esModule', {
 	    value: true
 	});
-	exports.BaseView = BaseView;
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -347,6 +399,9 @@
 	};
 
 	BaseView.rootClass();
+
+		exports[ 'default' ] = BaseView;
+		module.exports = exports[ 'default' ];
 
 /***/ },
 /* 3 */
@@ -721,8 +776,8 @@
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global, process) {/* jshint -W014, -W116, -W106, -W064, -W097, -W079 */
-	/* global process, global */
+		/* WEBPACK VAR INJECTION */
+		(function ( process ) {/* jshint -W014, -W116, -W106, -W064, -W097, -W079 */
 	/**
 	 * @preserve Copyright (c) 2013 Petka Antonov
 	 *
@@ -752,7 +807,6 @@
 
 	var INITIAL_DISTINCT_HANDLER_TYPES = 6;
 	var domain;
-	var Array = global.Array;
 	var isArray = Array.isArray;
 	var objectCreate = Object.create;
 
@@ -1410,7 +1464,8 @@
 	};
 
 	module.exports = EventEmitter;
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(7)))
+			/* WEBPACK VAR INJECTION */
+		}.call( exports, __webpack_require__( 7 ) ))
 
 /***/ },
 /* 7 */
@@ -1902,106 +1957,6 @@
 	Object.defineProperty(exports, '__esModule', {
 	    value: true
 	});
-	exports.BaseCollectionView = BaseCollectionView;
-
-	var _baseView = __webpack_require__(2);
-
-	function BaseCollectionView() {}
-
-	BaseCollectionView.prototype = {
-
-	    template: void 0,
-
-	    render: function render(collection) {
-	        if (!this.rootNode) {
-	            throw new Error('RootNode not specified');
-	        }
-
-	        var new_vdom = this.renderTpl(this.template, {
-	            collection: this.traverse(collection)
-	        });
-
-	        this['super'].render.call(this, new_vdom);
-	    },
-
-	    init: function init() {
-	        if (!this.templates) {
-	            throw new Error('Templates not specified');
-	        }
-
-	        if (!this.template) {
-	            throw new Error('Template not specified');
-	        }
-
-	        this['super'].init.call(this);
-	    },
-
-	    traverse: function traverse(collection) {
-	        if (!collection) {
-	            return '';
-	        }
-
-	        if (Object.prototype.toString.call(collection) !== '[object Array]') {
-	            throw new Error('Collection must be an Array');
-	        }
-
-	        var length = collection.length,
-	            i = 0,
-	            classHasFilterFunc = this.checkClassHasFilterFunc(),
-	            filterFunc = undefined;
-
-	        if (classHasFilterFunc) {
-	            filterFunc = function (item, index) {
-	                var curAC = this.activeSuperContext;
-	                this.activeSuperContext = this.inheritChain[this.inheritChain.length - 1];
-	                var res = this.filter(item, index);
-	                this.activeSuperContext = curAC;
-	                return res;
-	            };
-	        } else {
-	            filterFunc = (function () {
-	                var firstInCol = Object.keys(this.templates)[0];
-	                return function (item) {
-	                    return this.renderTpl(this.templates[firstInCol], item);
-	                };
-	            })();
-	        }
-
-	        var result = [];
-
-	        for (; i < length; i++) {
-	            result.push(filterFunc.call(this, collection[i], i));
-	        }
-
-	        return result;
-	    },
-
-	    checkClassHasFilterFunc: function checkClassHasFilterFunc() {
-	        var curAC = this.activeSuperContext,
-	            flag = false;
-
-	        this.activeSuperContext = this.inheritChain[this.inheritChain.length - 1];
-	        if (this[this.activeSuperContext + '$filter']) {
-	            flag = true;
-	        }
-	        this.activeSuperContext = curAC;
-
-	        return flag;
-	    }
-
-	};
-
-	BaseCollectionView['extends'](_baseView.BaseView);
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-	    value: true
-	});
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -2165,7 +2120,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 13 */
+	/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2173,9 +2128,14 @@
 	Object.defineProperty(exports, '__esModule', {
 	    value: true
 	});
-	exports.BaseItemView = BaseItemView;
+
+		function _interopRequireDefault ( obj ) {
+			return obj && obj.__esModule ? obj : { 'default': obj };
+		}
 
 	var _baseView = __webpack_require__(2);
+
+		var _baseView2 = _interopRequireDefault( _baseView );
 
 	function BaseItemView() {}
 
@@ -2203,10 +2163,13 @@
 
 	};
 
-	BaseItemView['extends'](_baseView.BaseView);
+		BaseItemView[ 'extends' ]( _baseView2[ 'default' ] );
+
+		exports[ 'default' ] = BaseItemView;
+		module.exports = exports[ 'default' ];
 
 /***/ },
-/* 14 */
+	/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2280,6 +2243,73 @@
 	BaseModel.rootClass();
 
 	exports['default'] = BaseModel;
+		module.exports = exports[ 'default' ];
+
+		/***/
+	},
+	/* 14 */
+	/***/ function ( module, exports, __webpack_require__ ) {
+
+		'use strict';
+
+		Object.defineProperty( exports, '__esModule', {
+			value: true
+		} );
+
+		function _interopRequireDefault ( obj ) {
+			return obj && obj.__esModule ? obj : { 'default': obj };
+		}
+
+		var _baseView = __webpack_require__( 2 );
+
+		var _baseView2 = _interopRequireDefault( _baseView );
+
+		function BaseTreeView () {
+		}
+
+		BaseTreeView.prototype = {
+
+			rootTemplate: void 0,
+
+			nodeTemplate: void 0,
+
+			listTemplate: void 0,
+
+			render: function render ( tree ) {
+				if ( !this.rootNode ) {
+					throw new Error( 'RootNode not specified' );
+				}
+
+				var new_vdom = this.traverse( tree );
+
+				this[ 'super' ].render.call( this, new_vdom );
+				this.activeSuperContext = this.inheritChain[ this.inheritChain.length - 1 ];
+			},
+
+			init: function init () {
+				if ( !this.nodeTemplate && !this.listTemplate ) {
+					throw new Error( 'Templates not specified' );
+				}
+				if ( !this.rootTemplate ) {
+					throw new Error( 'Root template not specified' );
+				}
+
+				this[ 'super' ].init.call( this );
+			},
+
+			traverse: function traverse ( tree ) {
+				var curAC = this.activeSuperContext;
+				this.activeSuperContext = this.inheritChain[ this.inheritChain.length - 1 ];
+				var res = this.traverse( tree );
+				this.activeSuperContext = curAC;
+				return res;
+			}
+
+		};
+
+		BaseTreeView[ 'extends' ]( _baseView2[ 'default' ] );
+
+		exports[ 'default' ] = BaseTreeView;
 	module.exports = exports['default'];
 
 /***/ }

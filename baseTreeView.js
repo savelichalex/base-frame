@@ -1,6 +1,6 @@
-import { BaseView } from './baseView';
+import BaseView from './baseView';
 
-export function BaseTreeView() {
+function BaseTreeView () {
 }
 
 BaseTreeView.prototype = {
@@ -16,7 +16,7 @@ BaseTreeView.prototype = {
             throw new Error('RootNode not specified');
         }
 
-        let new_vdom = this.traverse(tree);
+        let new_vdom = this.renderTpl( this.traverse( tree ) );
 
         this.super.render.call(this, new_vdom);
         this.activeSuperContext = this.inheritChain[this.inheritChain.length - 1];
@@ -44,3 +44,5 @@ BaseTreeView.prototype = {
 };
 
 BaseTreeView.extends(BaseView);
+
+export default BaseTreeView;

@@ -10,7 +10,9 @@ let h = vdom.h;
 import { defer, addEvent } from './util';
 import Emitter from './Emitter.js';
 
-export function BaseView() {
+import SVGAttributeHook from './svgAttributeHook';
+
+function BaseView () {
 }
 
 BaseView.prototype = {
@@ -33,14 +35,16 @@ BaseView.prototype = {
         diff: diff,
         patch: patch,
         createElement: createElement,
-        h: h
+        h: h,
+        svgAttributeHook: SVGAttributeHook
     },
 
     _listeners: void 0,
 
-    renderTpl: function ( func, obj ) {
+    renderTpl: function ( ht ) {
         var h = this.__vdom.h;
-        return eval( func( obj ) );
+        var SVGAttributeHook = this.__vdom.svgAttributeHook;
+        return eval( ht );
     },
 
     render: function(new_vdom) {
@@ -203,3 +207,5 @@ BaseView.prototype = {
 };
 
 BaseView.rootClass();
+
+export default BaseView;

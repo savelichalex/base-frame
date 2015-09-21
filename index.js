@@ -1,10 +1,11 @@
 module.exports = {
-    baseCollectionView: require('./baseCollectionView'),
-    baseComponent: require('./baseComponent'),
-    baseItemView: require('./baseItemView'),
-    baseModel: require('./baseModel'),
-    baseTreeView: require('./baseTreeView'),
-    baseView: require('./baseView'),
+    BaseCollectionView: require( './baseCollectionView' ),
+    BaseComponent: require( './baseComponent' ),
+    BaseItemView: require( './baseItemView' ),
+    BaseModel: require( './baseModel' ),
+    BaseTreeView: require( './baseTreeView' ),
+    BaseView: require( './baseView' ),
     Emitter: require('./Emitter'),
-    util: require('./util')
+    util: require( './util' ),
+    defer: require( './util' ).defer,
 };

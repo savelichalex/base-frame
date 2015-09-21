@@ -9,206 +9,194 @@ export function addEvent ( elem, event, fn ) {
     }
 }
 
-var clone = function(first, second) {
-    if(Object.prototype.toString.call(second) !== "[object Object]" ||
-        Object.prototype.toString.call(first) !== "[object Object]") {
-        throw new Error("variables must be type of object");
+Object.defineProperty( Function.prototype, 'extends', {
+    value: extend,
+    writable: false,
+    enumerable: false,
+    configurable: false
+} );
+
+Object.defineProperty( Function.prototype, 'rootClass', {
+    value: rootClass,
+    writable: false,
+    enumerable: false,
+    configurable: false
+} );
+
+function extend ( Parent ) {
+
+    var thisClassName = this.name || getFuncName( this ),
+        parentClassName = Parent.name || getFuncName( Parent );
+
+    function getFuncName ( func ) {
+        var funcNameRegExp = /^function\s*([^\s(]+)/;
+        return funcNameRegExp.exec( func.toString() )[ 1 ];
     }
 
-    for(var i in first) {
-        if(first.hasOwnProperty(i)) {
-            second[i] = first[i];
+    function getFunctionArgsAndBody ( func ) {
+        var result = /function[\w\s\$\_]*\(([\w\s,]*)[\/\*\*\/]*\)/g.exec( func.toString() );
+
+        return {
+            args: result[ 1 ].trim()
         }
+    };
+
+    //extend this prototype
+    this.prototype.inheritChain = Array.prototype.slice.call( Parent.prototype.inheritChain );
+    this.prototype.inheritChain.push( thisClassName );
+
+    this.prototype.activeSuperContext = thisClassName;
+    this.prototype.changeSuperContext = function () {
+        var inheritChainLen = this.inheritChain.length;
+
+        for ( var i = inheritChainLen; i > -1; i-- ) {
+            if ( this.activeSuperContext === this.inheritChain[ i ] ) break;
+        }
+
+        this.activeSuperContext = this.inheritChain[ i - 1 ];
+    };
+
+    var parentConstructor = getFunctionArgsAndBody( Parent );
+
+    this.prototype[ parentClassName + '$constructor' ] = Parent;
+
+    this.prototype[ parentClassName + '$constructor' ].inherited = true;
+
+    this.prototype.super = eval.call( null, '(function superFn(' + parentConstructor.args + ') {' +
+        'this.changeSuperContext(); ' +
+        'var i = this.activeSuperContext + \'$constructor\';' +
+        'this[i](' + parentConstructor.args + ');' +
+        'this.activeSuperContext = \'' + thisClassName + '\'; })' );
+
+    var thisProtoKeys = Object.keys( this.prototype ),
+        parentProtoKeys = Object.keys( Parent.prototype ),
+        thisProtoKeysLength = thisProtoKeys.length,
+        parentProtoKeysLength = parentProtoKeys.length,
+        funcInStr,
+        i;
+
+    function intersect ( x, y ) {
+        var ret = [],
+            x_len = x.length,
+            y_len = y.length;
+
+        for ( var i = 0; i < x_len; i++ ) {
+            for ( var z = 0; z < y_len; z++ ) {
+                if ( x[ i ] === y[ z ] ) {
+                    ret.push( x[ i ] );
+                    break;
+                }
+            }
+        }
+
+        return ret;
     }
-};
 
-var intersect = function(x, y) {
-    var ret = [],
-        x_len = x.length,
-        y_len = y.length;
+    var hasInThisPrototype = (function ( thisProto, parentProto ) {
+        var intersection = intersect( parentProto, thisProto ),
+            inter_len = intersection.length,
+            result = {};
 
-    for(var i = 0; i < x_len; i++) {
-        for(var z = 0; z < y_len; z++) {
-            if(x[i] === y[z]) {
-                ret.push(x[i]);
-                break;
-            }
-        }
-    }
-
-    return ret;
-};
-
-if(typeof Function.prototype.extends !== 'function')
-    Function.prototype.extends = function(Parent) {
-        var thisClassName = this.name,
-            parentClassName = Parent.name,
-            thisProtoKeys = Object.keys(this.prototype),
-            parentProtoKeys = Object.keys(Parent.prototype);
-
-        if(!thisClassName && !parentClassName) { //if function.name not working
-            var functionNameRegExp = /^function\s*([^\s(]+)/;
-            thisClassName = functionNameRegExp.exec(this.toString())[1];
-            parentClassName = functionNameRegExp.exec(Parent.toString())[1];
+        for ( var i = 0; i < inter_len; i++ ) {
+            result[ intersection[ i ] ] = true;
         }
 
-        var hasInThisPrototype = (function(thisProto, parentProto) {
-            var intersection = intersect(parentProto, thisProto),
-                inter_len = intersection.length,
-                result = {};
+        return result;
+    })( thisProtoKeys, parentProtoKeys );
 
-            for(var i = 0; i < inter_len; i++) {
-                result[intersection[i]] = true;
-            }
+    for ( i = 0; i < parentProtoKeysLength; i++ ) {
+        if ( !hasInThisPrototype[ parentProtoKeys[ i ] ] ) {
+            if ( typeof Parent.prototype[ parentProtoKeys[ i ] ] === 'function' ) {
+                if ( Parent.prototype[ parentProtoKeys[ i ] ].inherited ) {
+                    this.prototype[ parentProtoKeys[ i ] ] = Parent.prototype[ parentProtoKeys[ i ] ];
+                } else {
+                    this.prototype[ parentClassName + '$' + parentProtoKeys[ i ] ] = Parent.prototype[ parentProtoKeys[ i ] ];
 
-            return result;
-        })(thisProtoKeys, parentProtoKeys);
+                    funcInStr = getFunctionArgsAndBody( Parent.prototype[ parentProtoKeys[ i ] ] );
 
-        var thisProtoKeysLength = thisProtoKeys.length,
-            parentProtoKeysLength = parentProtoKeys.length,
-            funcInStr,
-            i;
+                    this.prototype[ parentProtoKeys[ i ] ] = eval.call( null, '(function (' + funcInStr.args + ') {' +
+                        'return this[\'' + parentClassName + '$' + parentProtoKeys[ i ] + '\'](' + funcInStr.args + ');' +
+                        '})' );
 
-        var getFunctionBody = function(func) {
-            var result = /function[\w\s\$]*\(([\w\s,]*)[\/\*\*\/]*\)[^{]+\{([\s\S]*)\}$/g.exec(func.toString());
-
-            return {
-                args: result[1].trim(),
-                body: result[2]
-            }
-        };
-
-        this.prototype.inheritChain = Array.prototype.slice.call(Parent.prototype.inheritChain);
-        this.prototype.inheritChain.push(thisClassName);
-
-        this.prototype.activeSuperContext = thisClassName;
-        this.prototype.changeSuperContext = function() {
-            var inheritChainLen = this.inheritChain.length;
-
-            for(var i = inheritChainLen; i > -1; i--) {
-                if(this.activeSuperContext === this.inheritChain[i]) break;
-            }
-
-            this.activeSuperContext = this.inheritChain[i - 1];
-        };
-
-        for(i = 0; i < parentProtoKeysLength; i++) {
-            if(typeof Parent.prototype[parentProtoKeys[i]] === 'function') {
-                if (!hasInThisPrototype[parentProtoKeys[i]]) {
-                    if(parentProtoKeys[i] === 'changeSuperContext' || parentProtoKeys[i] === 'super'){
-                        continue;
-                    } else if(parentProtoKeys[i].indexOf('$') !== -1 || Parent.prototype[parentProtoKeys[i]].inherited) {
-                        funcInStr = getFunctionBody(Parent.prototype[parentProtoKeys[i]]);
-
-                        this.prototype[parentProtoKeys[i]] = eval.call(null, '(function ' + parentProtoKeys[i] + '(' + funcInStr.args + ') {' + funcInStr.body + '})');
-                    } else {
-                        funcInStr = getFunctionBody(Parent.prototype[parentProtoKeys[i]]);
-
-                        this.prototype[parentClassName + '$' + parentProtoKeys[i]] =
-                            eval.call(null, '(function ' + parentClassName + '$' + parentProtoKeys[i] + '(' + funcInStr.args + ') {' + funcInStr.body + '})');
-                        this.prototype[parentProtoKeys[i]] = eval.call(null, '(function ' + parentProtoKeys[i] +  '(' + funcInStr.args + ') {' +
-                            'if(!this[this.activeSuperContext + \'$' + parentProtoKeys[i] + '\']) {' +
-                            'var currentActiveSuperContext = this.activeSuperContext;' +
-                            'while(!this[this.activeSuperContext + \'$' + parentProtoKeys[i] + '\'])' +
-                            'this.changeSuperContext();' +
-                            'var res = this[this.activeSuperContext + \'$' + parentProtoKeys[i] + '\'](' + funcInStr.args + ');' +
-                            'this.activeSuperContext = currentActiveSuperContext;' +
-                            'return res;' +
-                            '} else {' +
-                            'return this[this.activeSuperContext + \'$' + parentProtoKeys[i] + '\'](' + funcInStr.args + ');' +
-                            '}' +
-                            '})');
-
-                        this.prototype[parentProtoKeys[i]].inherited = true;
-                    }
+                    this.prototype[ parentClassName + '$' + parentProtoKeys[ i ] ].inherited = true;
                 }
             } else {
-                if(!hasInThisPrototype[parentProtoKeys[i]] && parentProtoKeys[i] !== 'inheritChain') {
-                    if(Object.prototype.toString.call(Parent.prototype[parentProtoKeys[i]]) === "[object Object]") {
-                        this.prototype[parentProtoKeys[i]] = {};
-                        clone(Parent.prototype[parentProtoKeys[i]], this.prototype[parentProtoKeys[i]]);
-                    }
-                }
+                this.prototype[ parentProtoKeys[ i ] ] = Parent.prototype[ parentProtoKeys[ i ] ];
             }
         }
+    }
 
-        var parentConstructor = getFunctionBody(Parent.toString());
+    if ( Parent.prototype.super ) {
+        var superKeys = Object.keys( Parent.prototype.super ),
+            superKeysLen = superKeys.length;
 
-        this.prototype[parentClassName + '$constructor'] =
-            eval.call(null, '(function ' + parentClassName + '$constructor(' + parentConstructor.args + ') {' + parentConstructor.body + '})');
-
-        this.prototype.super = eval.call(null, '(function superFn(' + parentConstructor.args + ') {' +
-            'this.changeSuperContext(); ' +
-            'var i = this.activeSuperContext + \'$constructor\';' +
-            'this[i](' + parentConstructor.args + ');' +
-            'this.activeSuperContext = \'' + thisClassName + '\'; })');
-
-        if(Parent.prototype.super) {
-            var superKeys = Object.keys(Parent.prototype.super),
-                superKeysLen = superKeys.length;
-
-            for(i = 0; i < superKeysLen; i++) {
-                this.prototype.super[superKeys[i]] = Parent.prototype.super[superKeys[i]];
-            }
+        for ( i = 0; i < superKeysLen; i++ ) {
+            this.prototype.super[ superKeys[ i ] ] = Parent.prototype.super[ superKeys[ i ] ];
         }
+    }
 
-        for(i = 0; i < thisProtoKeysLength; i++) {
-            if(typeof this.prototype[thisProtoKeys[i]] === 'function') {
-                funcInStr = getFunctionBody(this.prototype[thisProtoKeys[i]]);
-
-                this.prototype[thisClassName + '$' + thisProtoKeys[i]] =
-                    eval.call(null, '(function ' + thisClassName + '$' + thisProtoKeys[i] + '(' +funcInStr.args + ') {' + funcInStr.body + '})');
-                this.prototype[thisProtoKeys[i]] =
-                    eval.call(null, '(function ' + thisProtoKeys[i] + '(' + funcInStr.args + ') {' +
-                        'return this[this.activeSuperContext + \'$' + thisProtoKeys[i] + '\'](' + funcInStr.args + '); })');
-                this.prototype.super[thisProtoKeys[i]] = eval.call(null, '(function super$' + thisProtoKeys[i] + '(' + funcInStr.args + ') {' +
-                    'this.changeSuperContext(); ' +
-                    'var i = this.activeSuperContext + \'$' + thisProtoKeys[i] + '\';' +
-                    'var res = this[i](' + funcInStr.args + ');' +
-                    'this.activeSuperContext = \'' + thisClassName + '\';' +
-                    'return res; })'
-                );
+    for ( i = 0; i < thisProtoKeysLength; i++ ) {
+        if ( typeof this.prototype[ thisProtoKeys[ i ] ] === 'function' ) {
+            if ( thisProtoKeys[ i ] === 'changeSuperContext' || thisProtoKeys[ i ] === 'super' || thisProtoKeys[ i ].indexOf( 'constructor' ) !== -1 ) {
+                continue;
             }
+            funcInStr = getFunctionArgsAndBody( this.prototype[ thisProtoKeys[ i ] ] );
+
+            this.prototype[ thisClassName + '$' + thisProtoKeys[ i ] ] = this.prototype[ thisProtoKeys[ i ] ];
+
+            this.prototype[ thisProtoKeys[ i ] ] = eval.call( null, '(function (' + funcInStr.args + ') {' +
+                'return this[\'' + thisClassName + '$' + thisProtoKeys[ i ] + '\'](' + funcInStr.args + '); })' );
+
+            this.prototype.super[ thisProtoKeys[ i ] ] = eval.call( null, '(function super_' + thisProtoKeys[ i ] + '(' + funcInStr.args + ') {' +
+                'this.activeSuperContext = \'' + thisClassName + '\';' +
+                'this.changeSuperContext(); ' +
+                'var i = this.activeSuperContext + \'$' + thisProtoKeys[ i ] + '\';' +
+                'var res = this[i](' + funcInStr.args + ');' +
+                'this.activeSuperContext = \'' + thisClassName + '\';' +
+                'return res; })'
+            );
         }
-    };
+    }
+}
 
-if(typeof Function.prototype.rootClass !== 'function')
-    Function.prototype.rootClass = function() {
-        var thisClassName = this.name,
-            thisProtoKeys = Object.keys(this.prototype),
-            thisProtoKeysLength = thisProtoKeys.length,
-            i, funcInStr;
+function rootClass () {
+    var thisClassName = this.name,
+        thisProtoKeys = Object.keys( this.prototype ),
+        thisProtoKeysLength = thisProtoKeys.length,
+        i, funcInStr;
 
-        if(!thisClassName) { //if function.name not working
-            var functionNameRegExp = /^function\s*([^\s(]+)/;
-            thisClassName = functionNameRegExp.exec(this.toString())[1];
-        }
+    if ( !thisClassName ) { //if function.name not working
+        var functionNameRegExp = /^function\s*([^\s(]+)/;
+        thisClassName = functionNameRegExp.exec( this.toString() )[ 1 ];
+    }
 
-        var getFunctionBody = function(func) {
-            var result = /function[\w\s]*\(([\w\s,]*)\)[^{]+\{([\s\S]*)\}$/.exec(func.toString());
+    var getFunctionBody = function ( func ) {
+        var result = /function[\w\s\$\_]*\(([\w\s,]*)\)[^{]+\{([\s\S]*)\}$/.exec( func.toString() );
 
-            return {
-                args: result[1],
-                body: result[2]
-            }
-        };
-
-        this.prototype.inheritChain = [thisClassName];
-
-        for(i = 0; i < thisProtoKeysLength; i++) {
-            if(typeof this.prototype[thisProtoKeys[i]] === 'function') {
-                funcInStr = getFunctionBody(this.prototype[thisProtoKeys[i]]);
-
-                if(funcInStr.args.length === 0) {
-                    this.prototype[thisClassName + '$' + thisProtoKeys[i]] = Function(funcInStr.body);
-                    this.prototype[thisProtoKeys[i]] = Function('return this[\'' + thisClassName + '$' + thisProtoKeys[i] + '\']();');
-                } else {
-                    this.prototype[thisClassName + '$' + thisProtoKeys[i]] = Function(funcInStr.args, funcInStr.body);
-                    this.prototype[thisProtoKeys[i]] = Function(funcInStr.args, 'return this[\'' + thisClassName + '$' + thisProtoKeys[i] + '\'](' + funcInStr.args + ');');
-                }
-            }
+        return {
+            args: result[ 1 ],
+            body: result[ 2 ]
         }
     };
+
+    this.prototype.inheritChain = [ thisClassName ];
+
+    for ( i = 0; i < thisProtoKeysLength; i++ ) {
+        if ( typeof this.prototype[ thisProtoKeys[ i ] ] === 'function' ) {
+            funcInStr = getFunctionBody( this.prototype[ thisProtoKeys[ i ] ] );
+
+            if ( funcInStr.args.length === 0 ) {
+                this.prototype[ thisClassName + '$' + thisProtoKeys[ i ] ] = this.prototype[ thisProtoKeys[ i ] ];
+                this.prototype[ thisProtoKeys[ i ] ] = Function( 'return this[\'' + thisClassName + '$' + thisProtoKeys[ i ] + '\']();' );
+            } else {
+                this.prototype[ thisClassName + '$' + thisProtoKeys[ i ] ] = this.prototype[ thisProtoKeys[ i ] ]
+                this.prototype[ thisProtoKeys[ i ] ] = Function( funcInStr.args, 'return this[\'' + thisClassName + '$' + thisProtoKeys[ i ] + '\'](' + funcInStr.args + ');' );
+            }
+
+            this.prototype[ thisClassName + '$' + thisProtoKeys[ i ] ].inherited = true;
+        }
+    }
+}
 
 export function defer ( onFulfill, onReject ) {
     return {

@@ -1,6 +1,6 @@
-import { BaseView } from './baseView';
+import BaseView from './baseView';
 
-export function BaseCollectionView() {
+function BaseCollectionView () {
 }
 
 BaseCollectionView.prototype = {
@@ -12,9 +12,9 @@ BaseCollectionView.prototype = {
             throw new Error('RootNode not specified');
         }
 
-        let new_vdom = this.renderTpl(this.template, {
+        let new_vdom = this.renderTpl( this.template( {
             collection: this.traverse(collection)
-        });
+        } ) );
 
         this.super.render.call(this, new_vdom);
     },
@@ -87,3 +87,5 @@ BaseCollectionView.prototype = {
 };
 
 BaseCollectionView.extends(BaseView);
+
+export default BaseCollectionView;
