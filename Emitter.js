@@ -99,14 +99,14 @@ var Emitter = function() {
             }
         },
 
-        commandFrom: function (event) {
+        commandFrom: function ( event, context ) {
             var queue = [];
-            this.on(event + ':uniqueBefore')
+            this.on( event + ':uniqueBefore', context )
                 .then(function (id) {
-                    let promise = emitterProxy.once(event + ':' + id + ':up');
+                    let promise = emitterProxy.once( event + ':' + id + ':up', context );
                     emitterProxy.trigger(event + ':uniqueAfter');
                     queue.forEach(function (obj) {
-                        promise = promise.then(obj.onResolve, obj.onReject);
+                        promise = promise.bind( context ).then( obj.onResolve, obj.onReject );
                     });
                     promise.then(function (data) {
                         emitterProxy.trigger(event + ':' + id + ':down', data);

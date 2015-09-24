@@ -54,12 +54,12 @@ BaseCollectionView.prototype = {
                 return res;
             }
         } else {
-            filterFunc = (function() {
-                let firstInCol = Object.keys(this.templates)[0];
+            filterFunc = (function ( context ) {
+                let firstInCol = Object.keys( context.templates )[ 0 ];
                 return function(item) {
-                    return this.renderTpl(this.templates[firstInCol], item);
+                    return context.templates[ firstInCol ]( item );
                 }
-            }());
+            }( this ));
         }
 
         let result = [];

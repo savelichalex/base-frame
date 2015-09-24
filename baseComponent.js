@@ -100,13 +100,21 @@ BaseComponent.prototype = {
                         let method = _arr[0];
                         let event = _arr[1];
 
-                        this.emit[signals[signal]] = function (data) {
+                        this.emit[ signals[ signal ] ] = function ( data, obj ) {
+                            let _event;
+                            if ( obj ) {
+                                _event = event.replace( /\{([^\}]+)\}/g, function ( i, f ) {
+                                    return obj[ f ];
+                                } );
+                            } else {
+                                _event = event;
+                            }
                             switch (method) {
                                 case 'trigger':
-                                    emitter.trigger(event, data);
+                                    emitter.trigger( _event, data );
                                     break;
                                 case 'command':
-                                    return emitter.commandTo(event, data);
+                                    return emitter.commandTo( _event, data );
                                     break;
                             }
                         };
