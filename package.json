@@ -1,6 +1,6 @@
 {
   "name": "base-frame",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Base classes for creation your own application",
   "main": "index.js",
   "scripts": {
@@ -23,7 +23,7 @@
     "virtual-dom": "~2.1.0",
     "underscore": "1.8.*",
     "fastemitter-with-context": "~0.0.6",
-    "html-to-vdom-svg-fix": "~0.7.1"
+    "base-frame-extends": "0.*"
   },
   "devDependencies": {
     "babel-core": "5.8.*",

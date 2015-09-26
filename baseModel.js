@@ -13,10 +13,10 @@ BaseModel.prototype = {
 
     _properties: void 0,
 
-    defProperty: function(prop, value) {
+    defProperty: function (prop, value) {
         var self = this;
 
-        if(typeof value !== 'undefined') {
+        if (typeof value !== 'undefined') {
             this._properties[prop] = value;
         }
 
@@ -47,14 +47,12 @@ BaseModel.prototype = {
         return this._properties;
     },
 
-    init: function() {
+    init: function () {
         this._emitter = this._util.emitter();
-        this._emitter.name = this.inheritChain[ this.inheritChain.length - 1 ];
+        this._emitter.name = this.inheritChain[this.inheritChain.length - 1];
 
         this._properties = {};
     }
 };
-
-BaseModel.rootClass();
 
 export default BaseModel;

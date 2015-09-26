@@ -1,6 +1,6 @@
 import BaseView from './baseView';
 
-function BaseItemView () {
+function BaseItemView() {
 }
 
 BaseItemView.prototype = {
@@ -12,7 +12,7 @@ BaseItemView.prototype = {
             throw new Error('RootNode not specified');
         }
 
-        let new_vdom = this.renderTpl( this.template( model ) );
+        let new_vdom = this.renderTpl(this.template(model));
 
         this.super.render.call(this, new_vdom);
     },

@@ -61,8 +61,8 @@ BaseComponent.prototype = {
                                 break;
                         }
 
-                        if ( Object.prototype.toString.call( slots[ slot ] ) === '[object Function]' ) {
-                            slots[ slot ] = defer( slots[ slot ] );
+                        if (Object.prototype.toString.call(slots[slot]) === '[object Function]') {
+                            slots[slot] = defer(slots[slot]);
                         }
 
                         slots[slot]._queue.forEach(function (cb) {
@@ -100,21 +100,21 @@ BaseComponent.prototype = {
                         let method = _arr[0];
                         let event = _arr[1];
 
-                        this.emit[ signals[ signal ] ] = function ( data, obj ) {
+                        this.emit[signals[signal]] = function (data, obj) {
                             let _event;
-                            if ( obj ) {
-                                _event = event.replace( /\{([^\}]+)\}/g, function ( i, f ) {
-                                    return obj[ f ];
-                                } );
+                            if (obj) {
+                                _event = event.replace(/\{([^\}]+)\}/g, function (i, f) {
+                                    return obj[f];
+                                });
                             } else {
                                 _event = event;
                             }
                             switch (method) {
                                 case 'trigger':
-                                    emitter.trigger( _event, data );
+                                    emitter.trigger(_event, data);
                                     break;
                                 case 'command':
-                                    return emitter.commandTo( _event, data );
+                                    return emitter.commandTo(_event, data);
                                     break;
                             }
                         };
@@ -145,7 +145,7 @@ BaseComponent.prototype = {
 
     init: function() {
         this._emitter = this._util.emitter();
-        this._emitter.name = this.inheritChain[ this.inheritChain.length - 1 ] + '-local';
+        this._emitter.name = this.inheritChain[this.inheritChain.length - 1] + '-local';
 
 
         this._slots(this.slots);
@@ -153,7 +153,5 @@ BaseComponent.prototype = {
     }
 
 };
-
-BaseComponent.rootClass();
 
 export default BaseComponent;

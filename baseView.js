@@ -12,7 +12,7 @@ import Emitter from './Emitter.js';
 
 import SVGAttributeHook from './svgAttributeHook';
 
-function BaseView () {
+function BaseView() {
 }
 
 BaseView.prototype = {
@@ -41,10 +41,10 @@ BaseView.prototype = {
 
     _listeners: void 0,
 
-    renderTpl: function ( ht ) {
+    renderTpl: function (ht) {
         var h = this.__vdom.h;
         var SVGAttributeHook = this.__vdom.svgAttributeHook;
-        return eval( ht );
+        return eval(ht);
     },
 
     render: function(new_vdom) {
@@ -83,7 +83,7 @@ BaseView.prototype = {
                 let type = event_arr[0];
                 let target = event_arr[1];
                 let prevent = false;
-                if(event_arr.length > 2 && event_arr[2] === 'preventDefault') {
+                if (event_arr.length > 2 && event_arr[2] === 'preventDefault') {
                     prevent = true;
                 }
 
@@ -92,14 +92,14 @@ BaseView.prototype = {
 
                     this._initRootNode();
 
-                    this._util.addEvent( this.rootNode, type, this._searchListener( this, this.rootNode ) );
+                    this._util.addEvent(this.rootNode, type, this._searchListener(this, this.rootNode));
                 }
 
                 let listener = events[event];
 
                 if (!(_.isObject(listener) && listener._queue)) {
                     if (_.isFunction(listener)) {
-                        listener = this._util.defer( listener );
+                        listener = this._util.defer(listener);
                     } else {
                         throw new Error('Callback must be a function');
                     }
@@ -126,7 +126,7 @@ BaseView.prototype = {
                 function searchInListeners(target, context) {
                     let listener = context._listeners[eventType][target];
                     if (listener) {
-                        if(listener.prevent) {
+                        if (listener.prevent) {
                             event.preventDefault();
                         }
                         let _resolve;
@@ -146,16 +146,16 @@ BaseView.prototype = {
 
                 var hasListener = false;
                 if (!(searchInListeners(target.tag, context))) {  //TODO: not search when target does not have class or id
-                    if(target.className && (typeof target.className === 'string')) {
+                    if (target.className && (typeof target.className === 'string')) {
                         var classes = target.className.split(' ');
-                        classes.forEach(function(className) {
+                        classes.forEach(function (className) {
                             if (searchInListeners('.' + className, context)) { //TODO: multyple classes
                                 hasListener = true;
                             }
                         });
                     }
 
-                    if(target.id && !hasListener) {
+                    if (target.id && !hasListener) {
                         if (searchInListeners('#' + target.id, context)) {
                             hasListener = true;
                         }
@@ -190,7 +190,7 @@ BaseView.prototype = {
         }
 
         this._emitter = this._util.emitter();
-        this._emitter.name = this.inheritChain[ this.inheritChain.length - 1 ];
+        this._emitter.name = this.inheritChain[this.inheritChain.length - 1];
     },
 
     on: function(event, context) {
@@ -205,7 +205,5 @@ BaseView.prototype = {
         return this._emitter.trigger(event, data);
     },
 };
-
-BaseView.rootClass();
 
 export default BaseView;

@@ -38,7 +38,7 @@ var Emitter = function() {
 
         trigger: function (event, data) {
             console.log(event, this.name);
-            emitter.emit( event, data );
+            emitter.emit(event, data);
         },
 
         once: function (event, context) {
@@ -99,14 +99,14 @@ var Emitter = function() {
             }
         },
 
-        commandFrom: function ( event, context ) {
+        commandFrom: function (event, context) {
             var queue = [];
-            this.on( event + ':uniqueBefore', context )
+            this.on(event + ':uniqueBefore', context)
                 .then(function (id) {
-                    let promise = emitterProxy.once( event + ':' + id + ':up', context );
+                    let promise = emitterProxy.once(event + ':' + id + ':up', context);
                     emitterProxy.trigger(event + ':uniqueAfter');
                     queue.forEach(function (obj) {
-                        promise = promise.bind( context ).then( obj.onResolve, obj.onReject );
+                        promise = promise.bind(context).then(obj.onResolve, obj.onReject);
                     });
                     promise.then(function (data) {
                         emitterProxy.trigger(event + ':' + id + ':down', data);
