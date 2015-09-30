@@ -1,32 +1,46 @@
 import BaseView from './baseView';
 
-function BaseItemView() {
+/**
+ * Base view for work with single object
+ * @constructor
+ * @extends {BaseView}
+ * @throws {Error} if in child class not specified template
+ * @throws {Error} if specified template is not function ( because for template you must use loader which
+ * compile your template to function that create hypertext )
+ */
+function BaseItemView () {
+    if ( !this.template ) {
+        throw new Error( 'Template not specified' );
+    } else if ( Object.prototype.toString.call( this.template ) !== "[object Function]" ) {
+        throw new Error( 'Incorrect template' );
+    }
+
+    this.super();
 }
 
 BaseItemView.prototype = {
 
-    template: void 0,
+    /**
+     * Render view. This methods must use renderTpl from BaseView
+     * @override
+     * @param model
+     */
+    render: function ( model ) {
+        let templateHyperscript;
+        let newVdom;
 
-    render: function(model) {
-        if(!this.rootNode) {
-            throw new Error('RootNode not specified');
+        try {
+            templateHyperscript = this.template( model );
+        } catch ( e ) {
+            if ( e.name === 'ReferenceError' )
+                throw new ReferenceError( 'Incorrect model. Check that variables in template exist in model what you want to render' );
         }
 
-        let new_vdom = this.renderTpl(this.template(model));
-
-        this.super.render.call(this, new_vdom);
-    },
-
-    init: function() {
-        if(!this.template) {
-            throw new Error('Template not specified');
-        }
-
-        this.super.init.call(this);
+        newVdom = this.renderTpl( templateHyperscript );
+        return this.super.render.call( this, newVdom );
     }
-
 };
 
-BaseItemView.extends(BaseView);
+BaseItemView.extends( BaseView );
 
 export default BaseItemView;

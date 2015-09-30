@@ -1,37 +1,50 @@
 import BaseView from './baseView';
 
+/**
+ * Base view for work with collections. In child class you can override
+ * filter function that return rendered template for each collection element
+ * @constructor
+ * @extends {BaseView}
+ * @throws {Error} if not specified templates object
+ * @throws {Error} if not specified template ( for template you must use loader which
+ * compile your template to function that create hypertext )
+ */
 function BaseCollectionView() {
+    if ( !this.templates ) {
+        throw new Error( 'Templates not specified' );
+    }
+
+    if ( !this.template ) {
+        throw new Error( 'Template not specified' );
+    }
+
+    this.super();
 }
 
 BaseCollectionView.prototype = {
 
-    template: void 0,
-
+    /**
+     * Render view. This methods must use renderTpl from BaseView
+     * Call traverse function
+     * for every element
+     * @override
+     * @param collection
+     */
     render: function (collection) {
-        if (!this.rootNode) {
-            throw new Error('RootNode not specified');
-        }
-
         let new_vdom = this.renderTpl(this.template({
-            collection: this.traverse(collection)
+            collection: this._traverse( collection )
         }));
 
-        this.super.render.call(this, new_vdom);
+        return this.super.render.call( this, new_vdom );
     },
 
-    init: function () {
-        if (!this.templates) {
-            throw new Error('Templates not specified');
-        }
-
-        if (!this.template) {
-            throw new Error('Template not specified');
-        }
-
-        this.super.init.call(this);
-    },
-
-    traverse: function (collection) {
+    /**
+     * Go through the collection and call filter function (if exist) for every element
+     * @param collection
+     * @returns {String}
+     * @private
+     */
+    _traverse: function ( collection ) {
         if (!collection) {
             return '';
         }
@@ -42,7 +55,7 @@ BaseCollectionView.prototype = {
 
         let length = collection.length,
             i = 0,
-            classHasFilterFunc = this.checkClassHasFilterFunc(),
+            classHasFilterFunc = this._checkClassHasFilterFunc(),
             filterFunc;
 
         if (classHasFilterFunc) {
@@ -71,7 +84,12 @@ BaseCollectionView.prototype = {
         return result;
     },
 
-    checkClassHasFilterFunc: function () {
+    /**
+     * Check that current class have filter function
+     * @returns {boolean}
+     * @private
+     */
+    _checkClassHasFilterFunc: function () {
         var curAC = this.activeSuperContext,
             flag = false;
 

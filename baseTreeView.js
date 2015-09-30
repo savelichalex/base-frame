@@ -1,44 +1,42 @@
 import BaseView from './baseView';
 
+/**
+ * Base view for work with tree structures
+ * In child class must be declared traverse function
+ * @constructor
+ * @extends {BaseView}
+ * @throws {Error} when templates or root template not specified
+ * @throws {Error} if not specified traverse function
+ */
 function BaseTreeView() {
+    if ( !this.nodeTemplate ) {
+        throw new Error( 'Templates for node not specified' );
+    }
+    if ( !this.listTemplate ) {
+        throw new Error( 'Templates for list not specified' );
+    }
+    if ( !this.rootTemplate ) {
+        throw new Error( 'Root template not specified' );
+    }
+    if ( !this.traverse ) {
+        throw new Error( 'Traverse function is not specified' );
+    }
+
+    this.super();
 }
 
 BaseTreeView.prototype = {
 
-    rootTemplate: void 0,
-
-    nodeTemplate: void 0,
-
-    listTemplate: void 0,
-
-    render(tree) {
-        if(!this.rootNode) {
-            throw new Error('RootNode not specified');
-        }
-
+    /**
+     * Render view. This methods must use renderTpl from BaseView
+     * Call traverse function
+     * @override
+     * @param tree {Object}
+     */
+    render: function ( tree ) {
         let new_vdom = this.renderTpl(this.traverse(tree));
 
-        this.super.render.call(this, new_vdom);
-        this.activeSuperContext = this.inheritChain[this.inheritChain.length - 1];
-    },
-
-    init: function() {
-        if(!this.nodeTemplate && !this.listTemplate) {
-            throw new Error('Templates not specified');
-        }
-        if(!this.rootTemplate) {
-            throw new Error('Root template not specified');
-        }
-
-        this.super.init.call(this);
-    },
-
-    traverse: function(tree) {
-        var curAC = this.activeSuperContext;
-        this.activeSuperContext = this.inheritChain[this.inheritChain.length - 1];
-        var res = this.traverse(tree);
-        this.activeSuperContext = curAC;
-        return res;
+        return this.super.render.call( this, new_vdom );
     }
 
 };

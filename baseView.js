@@ -1,79 +1,136 @@
 import vdom from 'virtual-dom';
-//import diff from 'virtual-dom/diff';
-//import patch from 'virtual-dom/patch';
-//import createElement from 'virtual-dom/create';
 let diff = vdom.diff;
 let patch = vdom.patch;
 let createElement = vdom.create;
 let h = vdom.h;
 
-import { defer, addEvent } from './util';
-import Emitter from './Emitter.js';
+import { addEvent } from './util';
 
+//from base-components
+import { Emitter, defer } from 'base-components';
+
+// hack for use AttributeHook from
+// https://github.com/Matt-Esch/virtual-dom/blob/master/virtual-hyperscript/hooks/attribute-hook.js used for svg
+// support
 import SVGAttributeHook from './svgAttributeHook';
 
+//savelichalex: for use views on server by node.js and for tests must check environment
+//i think that must use views on server just returning html if this is need
+var isBrowser = typeof window !== 'undefined';
+
+/**
+ * Base class for views
+ * Offers methods for create events, render model with virtual-dom and
+ * methods to work with own emitter to create events. That's help to tell
+ * to another object that something happened
+ * @constructor
+ */
 function BaseView() {
+
+    this._listeners = {};
+
+    if ( this.events ) {
+        this._createEvents( this.events );
+    }
+
+    this._emitter = this._util.emitter();
+    if ( this.inheritChain ) {
+        this._emitter.name = this.inheritChain[ this.inheritChain.length - 1 ];
+    }
+
+    this._vdom = void 0;
+    this._vdomNode = void 0;
+
 }
 
 BaseView.prototype = {
 
-    _emitter: void 0,
-
-    rootNode: void 0,
-
-    _vdom: void 0,
-
-    _vdomNode: void 0,
-
+    /**
+     * Contain functions to prevent create closure for this
+     * @private
+     */
     _util: {
         emitter: Emitter,
         defer: defer,
-        addEvent: addEvent
-    },
-
-    __vdom: {
-        diff: diff,
-        patch: patch,
-        createElement: createElement,
+        addEvent: addEvent,
         h: h,
         svgAttributeHook: SVGAttributeHook
     },
 
-    _listeners: void 0,
-
+    /**
+     * Used for evaluate hypertext returned form template
+     * @param ht {String} Hypertext (virtual-dom/h) that created in
+     * overrided render method in child class
+     * @returns {Object} VNode
+     * @protected
+     */
     renderTpl: function (ht) {
-        var h = this.__vdom.h;
-        var SVGAttributeHook = this.__vdom.svgAttributeHook;
+        var h = this._util.h;
+        var SVGAttributeHook = this._util.svgAttributeHook;
         return eval(ht);
     },
 
+    /**
+     * Main view function, that must be override by child classes
+     * @param new_vdom VNode from child overrided render method
+     * @returns {VNode} if this is not browser environment
+     * @public
+     */
     render: function(new_vdom) {
         if(this._vdom) {
-            var patches = this.__vdom.diff(this._vdom, new_vdom);
-            this._vdomNode = this.__vdom.patch(this._vdomNode, patches);
+            var patches = diff( this._vdom, new_vdom );
+            this._vdomNode = patch( this._vdomNode, patches );
         } else {
-            this._vdomNode = this.__vdom.createElement(new_vdom);
+            this._vdomNode = createElement( new_vdom );
         }
         this._vdom = new_vdom;
 
         this._initRootNode();
 
-        this.rootNode.appendChild(this._vdomNode);
+        if ( isBrowser ) {
+            this.rootNode.appendChild( this._vdomNode );
 
-        this.trigger('renderComplete');
+            this.trigger( 'renderComplete' );
+        } else {
+            this.trigger( 'renderComplete' );
+            return this._vdom;
+        }
     },
 
+    /**
+     * Initialise root node if this not done yet
+     * @throws {Error} if root node not specified in child class
+     * @private
+     */
     _initRootNode: function() {
         if(!this.rootNode) {
             throw new Error('RootNode not specified in ' + this.inheritChain[this.inheritChain.length - 1]);
         }
-        if(_.isString(this.rootNode)) {
-            this.rootNode = $(this.rootNode)[0];
+        if ( Object.prototype.toString.call( this.rootNode ) === "[object String]" ) {
+            if ( isBrowser ) {
+                this.rootNode = document.querySelector( this.rootNode );
+            }
+            if ( !this.rootNode ) {
+                console.warn( this.rootNode + ' not found on document' );
+            }
         }
     },
 
+    /**
+     * Create event handlers which specified in child class.
+     * Main part of events creation is that only root view node
+     * have event listeners for all specified events.
+     * It is based on fact that event can bubble to parent node.
+     * With this in mind, you can decrease event listeners in your code,
+     * hence saving memory and help compiler to optimise hot function
+     * @param events {Object}
+     * @throws {Error} if events object is not a hash object
+     * @throws {Error} if not valid event declaration
+     * @private
+     * TODO: right event handling for not bubble events
+     */
     _createEvents: function(events) {
-        if(!(_.isObject(events))) {
+        if ( Object.prototype.toString.call( events ) !== "[object Object]" ) {
             throw new Error('Events must be a hash object');
         }
 
@@ -82,6 +139,11 @@ BaseView.prototype = {
                 let event_arr = event.split(' ');
                 let type = event_arr[0];
                 let target = event_arr[1];
+
+                if ( !target ) {
+                    throw new Error( 'Event must be with target node' );
+                }
+
                 let prevent = false;
                 if (event_arr.length > 2 && event_arr[2] === 'preventDefault') {
                     prevent = true;
@@ -92,13 +154,15 @@ BaseView.prototype = {
 
                     this._initRootNode();
 
-                    this._util.addEvent(this.rootNode, type, this._searchListener(this, this.rootNode));
+                    if ( isBrowser ) {
+                        this._util.addEvent( this.rootNode, type, this._searchListener( this, this.rootNode ) );
+                    }
                 }
 
                 let listener = events[event];
 
-                if (!(_.isObject(listener) && listener._queue)) {
-                    if (_.isFunction(listener)) {
+                if ( Object.prototype.toString.call( listener ) !== "[object Object]" && !listener._queue ) {
+                    if ( Object.prototype.toString.call( listener ) === "[object Function]" ) {
                         listener = this._util.defer(listener);
                     } else {
                         throw new Error('Callback must be a function');
@@ -111,6 +175,13 @@ BaseView.prototype = {
         }
     },
 
+    /**
+     * Create function that used as callback to event listener
+     * @param context
+     * @param rootNode
+     * @returns {Function}
+     * @private
+     */
     _searchListener: function(context, rootNode) {
         return function(event) {
             //event = event.originalEvent; //because use jQuery, temp
@@ -182,28 +253,35 @@ BaseView.prototype = {
         }
     },
 
-    init: function() {
-        this._listeners = {};
-
-        if(this.events) {
-            this._createEvents(this.events);
-        }
-
-        this._emitter = this._util.emitter();
-        this._emitter.name = this.inheritChain[this.inheritChain.length - 1];
-    },
-
+    /**
+     * Short method to use emitter
+     * @param event
+     * @param context
+     * @returns {*}
+     */
     on: function(event, context) {
         return this._emitter.on(event, context);
     },
 
+    /**
+     * Short method to use emitter
+     * @param event
+     * @param context
+     * @returns {*}
+     */
     once: function(event, context) {
         return this._emitter.once(event, context);
     },
 
+    /**
+     * Short method to use emitter
+     * @param event
+     * @param data
+     * @returns {*}
+     */
     trigger: function(event, data) {
         return this._emitter.trigger(event, data);
-    },
+    }
 };
 
 export default BaseView;
