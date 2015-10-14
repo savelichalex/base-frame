@@ -1,4 +1,4 @@
-import BaseView from './baseView';
+var BaseView = require( './baseView' );
 
 /**
  * Base view for work with tree structures
@@ -34,7 +34,7 @@ BaseTreeView.prototype = {
      * @param tree {Object}
      */
     render: function ( tree ) {
-        let new_vdom = this.renderTpl(this.traverse(tree));
+        var new_vdom = this.renderTpl( this.traverse( tree ) );
 
         return this.super.render.call( this, new_vdom );
     }
@@ -43,4 +43,4 @@ BaseTreeView.prototype = {
 
 BaseTreeView.extends(BaseView);
 
-export default BaseTreeView;
+module.exports = BaseTreeView;

@@ -1,18 +1,19 @@
-import vdom from 'virtual-dom';
-let diff = vdom.diff;
-let patch = vdom.patch;
-let createElement = vdom.create;
-let h = vdom.h;
+var vdom = require( 'virtual-dom' );
+var diff = vdom.diff;
+var patch = vdom.patch;
+var createElement = vdom.create;
+var h = vdom.h;
 
-import { addEvent } from './util';
+var addEvent = require( './util' ).addEvent;
 
 //from base-components
-import { Emitter, defer } from 'base-components';
+var Emitter = require( 'base-components' ).Emitter;
+var defer = require( 'base-components' ).defer;
 
 // hack for use AttributeHook from
 // https://github.com/Matt-Esch/virtual-dom/blob/master/virtual-hyperscript/hooks/attribute-hook.js used for svg
 // support
-import SVGAttributeHook from './svgAttributeHook';
+var SVGAttributeHook = require( './svgAttributeHook' );
 
 //savelichalex: for use views on server by node.js and for tests must check environment
 //i think that must use views on server just returning html if this is need
@@ -134,17 +135,17 @@ BaseView.prototype = {
             throw new Error('Events must be a hash object');
         }
 
-        for(let event in events) {
+        for( var event in events ) {
             if(events.hasOwnProperty(event)) {
-                let event_arr = event.split(' ');
-                let type = event_arr[0];
-                let target = event_arr[1];
+                var event_arr = event.split( ' ' );
+                var type = event_arr[ 0 ];
+                var target = event_arr[ 1 ];
 
                 if ( !target ) {
                     throw new Error( 'Event must be with target node' );
                 }
 
-                let prevent = false;
+                var prevent = false;
                 if (event_arr.length > 2 && event_arr[2] === 'preventDefault') {
                     prevent = true;
                 }
@@ -159,7 +160,7 @@ BaseView.prototype = {
                     }
                 }
 
-                let listener = events[event];
+                var listener = events[ event ];
 
                 if ( Object.prototype.toString.call( listener ) !== "[object Object]" && !listener._queue ) {
                     if ( Object.prototype.toString.call( listener ) === "[object Function]" ) {
@@ -185,23 +186,23 @@ BaseView.prototype = {
     _searchListener: function(context, rootNode) {
         return function(event) {
             //event = event.originalEvent; //because use jQuery, temp
-            let target = event.target;
+            var target = event.target;
             function searchByTarget(target, context) {
                 target = {
                     tag: target.nodeName.toLowerCase(),
                     className: target.className,
                     id: target.id
                 };
-                let eventType = event.type;
+                var eventType = event.type;
 
                 function searchInListeners(target, context) {
-                    let listener = context._listeners[eventType][target];
+                    var listener = context._listeners[ eventType ][ target ];
                     if (listener) {
                         if (listener.prevent) {
                             event.preventDefault();
                         }
-                        let _resolve;
-                        let promise = new Promise(function (resolve) {
+                        var _resolve;
+                        var promise = new Promise( function ( resolve ) {
                             _resolve = resolve;
                         });
                         listener._queue.forEach(function (o) {
@@ -284,4 +285,4 @@ BaseView.prototype = {
     }
 };
 
-export default BaseView;
+module.exports = BaseView;

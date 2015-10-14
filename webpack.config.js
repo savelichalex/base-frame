@@ -7,15 +7,12 @@ module.exports = {
         filename: 'base-frame.js'
     },
     externals: {
-        'underscore': '_'
+        'underscore': '_',
+        'virtual-dom': 'virtualDom',
+        'bluebird': 'Promise'
     },
     module: {
         loaders: [
-            {
-                test: /\.js/,
-                loader: 'babel-loader',
-                exclude: /node_modules/
-            },
             {
                 test: /\.json/,
                 loader: 'json-loader'

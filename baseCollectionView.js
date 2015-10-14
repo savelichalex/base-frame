@@ -1,4 +1,4 @@
-import BaseView from './baseView';
+var BaseView = require( './baseView' );
 
 /**
  * Base view for work with collections. In child class you can override
@@ -31,7 +31,7 @@ BaseCollectionView.prototype = {
      * @param collection
      */
     render: function (collection) {
-        let new_vdom = this.renderTpl(this.template({
+        var new_vdom = this.renderTpl( this.template( {
             collection: this._traverse( collection )
         }));
 
@@ -53,7 +53,7 @@ BaseCollectionView.prototype = {
             throw new Error('Collection must be an Array');
         }
 
-        let length = collection.length,
+        var length = collection.length,
             i = 0,
             classHasFilterFunc = this._checkClassHasFilterFunc(),
             filterFunc;
@@ -68,14 +68,14 @@ BaseCollectionView.prototype = {
             }
         } else {
             filterFunc = (function (context) {
-                let firstInCol = Object.keys(context.templates)[0];
+                var firstInCol = Object.keys( context.templates )[ 0 ];
                 return function (item) {
                     return context.templates[firstInCol](item);
                 }
             }(this));
         }
 
-        let result = [];
+        var result = [];
 
         for (; i < length; i++) {
             result.push(filterFunc.call(this, collection[i], i));
@@ -106,4 +106,4 @@ BaseCollectionView.prototype = {
 
 BaseCollectionView.extends(BaseView);
 
-export default BaseCollectionView;
+module.exports = BaseCollectionView;

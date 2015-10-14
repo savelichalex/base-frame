@@ -1,4 +1,4 @@
-export function addEvent(elem, event, fn) {
+module.exports.addEvent = function addEvent( elem, event, fn ) {
     if (elem.addEventListener) {
         elem.addEventListener(event, fn, false);
     } else {
@@ -7,4 +7,4 @@ export function addEvent(elem, event, fn) {
             return (fn.call(elem, window.event));
         });
     }
-}
+};

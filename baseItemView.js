@@ -1,4 +1,4 @@
-import BaseView from './baseView';
+var BaseView = require( './baseView' );
 
 /**
  * Base view for work with single object
@@ -26,8 +26,8 @@ BaseItemView.prototype = {
      * @param model
      */
     render: function ( model ) {
-        let templateHyperscript;
-        let newVdom;
+        var templateHyperscript;
+        var newVdom;
 
         try {
             templateHyperscript = this.template( model );
@@ -43,4 +43,4 @@ BaseItemView.prototype = {
 
 BaseItemView.extends( BaseView );
 
-export default BaseItemView;
+module.exports = BaseItemView;

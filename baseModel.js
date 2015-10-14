@@ -1,4 +1,4 @@
-import { Emitter } from 'base-components';
+var Emitter = require( 'base-components' ).Emitter;
 
 /**
  * Base class for work with models
@@ -81,4 +81,4 @@ BaseModel.prototype = {
     }
 };
 
-export default BaseModel;
+module.exports = BaseModel;
