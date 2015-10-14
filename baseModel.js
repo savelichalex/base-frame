@@ -16,6 +16,7 @@ function BaseModel () {
 }
 
 BaseModel.prototype = {
+    constructor: BaseModel,
 
     _util: {
         emitter: Emitter

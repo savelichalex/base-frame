@@ -26,6 +26,7 @@ function BaseTreeView() {
 }
 
 BaseTreeView.prototype = {
+    constructor: BaseTreeView,
 
     /**
      * Render view. This methods must use renderTpl from BaseView

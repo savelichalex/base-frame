@@ -22,6 +22,7 @@ function BaseCollectionView() {
 }
 
 BaseCollectionView.prototype = {
+    constructor: BaseCollectionView,
 
     /**
      * Render view. This methods must use renderTpl from BaseView

@@ -19,6 +19,7 @@ function BaseItemView () {
 }
 
 BaseItemView.prototype = {
+    constructor: BaseItemView,
 
     /**
      * Render view. This methods must use renderTpl from BaseView

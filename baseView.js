@@ -45,6 +45,7 @@ function BaseView() {
 }
 
 BaseView.prototype = {
+    constructor: BaseView,
 
     /**
      * Contain functions to prevent create closure for this
