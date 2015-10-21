@@ -108,7 +108,10 @@ BaseView.prototype = {
         if(!this.rootNode) {
             throw new Error('RootNode not specified in ' + this.inheritChain[this.inheritChain.length - 1]);
         }
-        if ( Object.prototype.toString.call( this.rootNode ) === "[object String]" ) {
+        if( Object.prototype.toString.call( this.rootNode ) === "[object Function]" ) {
+            this.rootNode = this.rootNode();
+        }
+        if( Object.prototype.toString.call( this.rootNode ) === "[object String]" ) {
             if ( isBrowser ) {
                 this.rootNode = document.querySelector( this.rootNode );
             }
@@ -132,6 +135,9 @@ BaseView.prototype = {
      * TODO: right event handling for not bubble events
      */
     _createEvents: function(events) {
+        if( Object.prototype.toString.call( events ) === "[object Function]" ) {
+            this._createEvents( this.events() );
+        }
         if ( Object.prototype.toString.call( events ) !== "[object Object]" ) {
             throw new Error('Events must be a hash object');
         }

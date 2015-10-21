@@ -12,10 +12,23 @@ var BaseView = require( './baseView' );
 function BaseCollectionView() {
     if ( !this.templates ) {
         throw new Error( 'Templates not specified' );
+    } else {
+        if( Object.prototype.toString.call( this.templates ) === '[object Function]' ) {
+            this.templates = this.templates();
+        }
     }
 
     if ( !this.template ) {
         throw new Error( 'Template not specified' );
+    } else {
+        if( Object.prototype.toString.call( this.template ) === '[object Function]' ) {
+            var templateFn = this.template;
+            try {
+                this.template = this.template();
+            } catch( e ) {
+                this.template = templateFn;
+            }
+        }
     }
 
     this.super();
