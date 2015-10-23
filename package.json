@@ -1,6 +1,6 @@
 {
   "name": "base-frame",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Base classes for creation your own application",
   "main": "index.js",
   "scripts": {

@@ -209,7 +209,7 @@ BaseView.prototype = {
                             event.preventDefault();
                         }
                         var _resolve;
-                        var promise = new Promise( function ( resolve ) {
+                        var promise = new context._emitter.Promise( function ( resolve ) {
                             _resolve = resolve;
                         });
                         listener._queue.forEach(function (o) {
