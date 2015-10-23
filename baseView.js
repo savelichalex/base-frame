@@ -136,7 +136,7 @@ BaseView.prototype = {
      */
     _createEvents: function(events) {
         if( Object.prototype.toString.call( events ) === "[object Function]" ) {
-            this._createEvents( this.events() );
+            return this._createEvents( this.events() );
         }
         if ( Object.prototype.toString.call( events ) !== "[object Object]" ) {
             throw new Error('Events must be a hash object');
