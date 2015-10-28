@@ -9,10 +9,17 @@ var BaseView = require( './baseView' );
  * compile your template to function that create hypertext )
  */
 function BaseItemView () {
-    if ( !this.template ) {
+    if( !this.template ) {
         throw new Error( 'Template not specified' );
-    } else if ( Object.prototype.toString.call( this.template ) !== "[object Function]" ) {
-        throw new Error( 'Incorrect template' );
+    } else {
+        if( Object.prototype.toString.call( this.template ) === '[object Function]' ) {
+            var templateFn = this.template;
+            try {
+                this.template = this.template();
+            } catch( e ) {
+                this.template = templateFn;
+            }
+        }
     }
 
     this.super();

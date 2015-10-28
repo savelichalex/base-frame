@@ -94,7 +94,7 @@ BaseView.prototype = {
 
             this.trigger( 'renderComplete' );
         } else {
-            this.trigger( 'renderComplete' );
+            this.trigger( 'renderComplete', this._vdom );
             return this._vdom;
         }
     },
