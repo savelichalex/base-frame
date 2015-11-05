@@ -113,7 +113,7 @@ BaseCollectionView.prototype = {
         }
         this.activeSuperContext = curAC;
 
-        return flag;
+        return flag || typeof this.filter === 'function';
     }
 
 };
