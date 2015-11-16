@@ -217,7 +217,7 @@ describe( 'BaseView', function () {
         var test = new TestView();
 
         test.once( 'renderComplete' ).then( function ( s ) {
-            expect( s ).is.not.ok;
+            expect( s ).to.be.an( 'object' );
             done();
         }, function ( err ) {
             done( err );

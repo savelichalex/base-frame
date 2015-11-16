@@ -1,10 +1,10 @@
 {
   "name": "base-frame",
-  "version": "0.3.11",
+  "version": "0.3.12",
   "description": "Base classes for creation your own application",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --compilers js:babel-core/register tests"
+    "test": "mocha tests"
   },
   "repository": {
     "type": "git",
@@ -27,6 +27,7 @@
     "virtual-dom": "~2.1.0"
   },
   "devDependencies": {
+    "babel-core": "^6.1.21",
     "chai": "^3.3.0",
     "json-loader": "0.5.*",
     "mocha": "^2.3.3",

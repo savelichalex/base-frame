@@ -113,7 +113,11 @@ BaseView.prototype = {
         }
         if( Object.prototype.toString.call( this.rootNode ) === "[object String]" ) {
             if ( isBrowser ) {
-                this.rootNode = document.querySelector( this.rootNode );
+                //reset event listeners by clone rootNode
+                var rootNode = document.querySelector( this.rootNode );
+                var newRootNode = rootNode.cloneNode( true );
+                rootNode.parentNode.replaceChild( newRootNode, rootNode );
+                this.rootNode = newRootNode;
             }
             if ( !this.rootNode ) {
                 console.warn( this.rootNode + ' not found on document' );
