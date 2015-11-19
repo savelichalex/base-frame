@@ -19,6 +19,9 @@ function BaseItemView () {
             } catch( e ) {
                 this.template = templateFn;
             }
+            if( Object.prototype.toString.call( this.template ) === '[object String]' ) {
+                this.template = templateFn;
+            }
         }
     }
 
