@@ -8,7 +8,7 @@ var BaseView = require( './baseView' );
  * @throws {Error} when templates or root template not specified
  * @throws {Error} if not specified traverse function
  */
-function BaseTreeView() {
+function BaseTreeView(options) {
     if ( !this.nodeTemplate ) {
         throw new Error( 'Templates for node not specified' );
 	} else {
@@ -49,7 +49,7 @@ function BaseTreeView() {
         throw new Error( 'Traverse function is not specified' );
     }
 
-    this.super();
+	this.super(options);
 }
 
 BaseTreeView.prototype = {

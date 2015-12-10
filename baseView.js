@@ -26,11 +26,11 @@ var isBrowser = typeof window !== 'undefined';
  * to another object that something happened
  * @constructor
  */
-function BaseView() {
-
+function BaseView(options) {
+    options = options || {};
     this._listeners = {};
 
-    if ( this.events ) {
+    if(this.events && !options.preventEvents) {
         this._createEvents( this.events );
     }
 
@@ -113,11 +113,15 @@ BaseView.prototype = {
         }
         if( Object.prototype.toString.call( this.rootNode ) === "[object String]" ) {
             if ( isBrowser ) {
-                //reset event listeners by clone rootNode
-                var rootNode = document.querySelector( this.rootNode );
-                var newRootNode = rootNode.cloneNode( true );
-                rootNode.parentNode.replaceChild( newRootNode, rootNode );
-                this.rootNode = newRootNode;
+                if(!this.resetRootNode) {
+                    this.rootNode = document.querySelector(this.rootNode);
+                } else {
+                    //reset event listeners by clone rootNode
+                    var rootNode = document.querySelector(this.rootNode);
+                    var newRootNode = rootNode.cloneNode(true);
+                    rootNode.parentNode.replaceChild(newRootNode, rootNode);
+                    this.rootNode = newRootNode;
+                }
             }
             if ( !this.rootNode ) {
                 console.warn( this.rootNode + ' not found on document' );
