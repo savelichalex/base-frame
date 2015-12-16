@@ -8,7 +8,7 @@ var BaseView = require( './baseView' );
  * @throws {Error} if specified template is not function ( because for template you must use loader which
  * compile your template to function that create hypertext )
  */
-function BaseItemView () {
+function BaseItemView(options) {
     if( !this.template ) {
         throw new Error( 'Template not specified' );
     } else {
@@ -25,7 +25,7 @@ function BaseItemView () {
         }
     }
 
-    this.super();
+    this.super(options);
 }
 
 BaseItemView.prototype = {
@@ -36,7 +36,10 @@ BaseItemView.prototype = {
      * @override
      * @param model
      */
-    render: function ( model ) {
+    render: function(model, overwrite) {
+        if(overwrite) {
+            return this.super.render.call(this, model);
+        }
         var templateHyperscript;
         var newVdom;
 
