@@ -9,7 +9,7 @@ var BaseView = require( './baseView' );
  * @throws {Error} if not specified template ( for template you must use loader which
  * compile your template to function that create hypertext )
  */
-function BaseCollectionView() {
+function BaseCollectionView(options) {
     if ( !this.templates ) {
         throw new Error( 'Templates not specified' );
     } else {
@@ -31,7 +31,7 @@ function BaseCollectionView() {
         }
     }
 
-    this.super();
+    this.super(options);
 }
 
 BaseCollectionView.prototype = {

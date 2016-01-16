@@ -41,7 +41,6 @@ function BaseView(options) {
 
     this._vdom = void 0;
     this._vdomNode = void 0;
-
 }
 
 BaseView.prototype = {
@@ -95,8 +94,11 @@ BaseView.prototype = {
             this.trigger( 'renderComplete' );
         } else {
             this.trigger( 'renderComplete', this._vdom );
-            return this._vdom;
         }
+        if(typeof this.renderComplete === 'function') {
+            setTimeout(() => this.renderComplete.call(this), 0);
+        }
+        return this._vdom;
     },
 
     /**
